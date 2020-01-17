@@ -196,5 +196,6 @@ services:
     working_dir: /e2e
     volumes:
       - ./:/e2e
+      - npms:/e2e/node_modules
     networks:
       internal:
