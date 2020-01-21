@@ -1,31 +1,33 @@
 context('checks navigation after logging in', () => {
-  beforeEach(() => {
-    //cy.visit('https://demo.avalonmediasystem.org')
-	cy.visit('https://spruce.dlib.indiana.edu')
-	cy.get(' a[href*="sign_in"] ').first().click()
-	cy.get('form').within(() => {
-		cy.get('#auth_key').type('sumith3@example.com').should('have.value', 'sumith3@example.com') // Only yield inputs within form
-		cy.get('#password').type('sumith3') // Only yield textareas within form
-		})
-	cy.get('button[type=submit]').last().click()
-  })
 
   //checks navigation when create new playlist is accessed
-  it('.create_playlists() - click on a DOM element', () => {
+  it('.create_playlists()', () => {
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+			//
+	cy.url().should('include', '/playlists/new')
   })
 
   //is able to create private (default) playlist
-  it('.validate_create_playlist() - click on a DOM element', () => {
+  it('.validate_create_playlist()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
+		
 	cy.get('#playlist_title').type('Cypress Testing')
-	cy.get('#playlist_comment').type('Cyrpres testing comments')
-	cy.contains('Create').click()
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	cy.get('#playlist_comment').type('Cypress testing comments')
+	//cy.contains('Create').click()
+	//cy.get('input[name=commit]').last().click()
+		cy.get('#playlist_form').submit()
+	
+	cy.visit('/playlists')
 	cy.contains('Cypress Testing')
 	cy.contains('Visibility')
 	cy.contains('Created')
@@ -40,14 +42,21 @@ context('checks navigation after logging in', () => {
   })
 
   //is able to view playlist by clicking on playlist name
-  it('.view_playlist() - click on a DOM element', () => {
+  it('.view_playlist()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing2')
 	cy.get('#playlist_comment').type('Cypress testing2 comments')
-	cy.contains('Create').click()
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
+
+	cy.visit('/playlists')
 	cy.contains('Cypress Testing2').click()
 	cy.contains('Edit Playlist')
 	cy.contains('Cypress testing2 comments')
@@ -56,31 +65,45 @@ context('checks navigation after logging in', () => {
   })
 
   //deletes playlist permanently from playlists page
-  it('.delete_playlist() - click on a DOM element', () => {
+  it('.delete_playlist()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing3')
 	cy.get('#playlist_comment').type('Cypress testing3 comments')
-	cy.contains('Create').click()
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
+
+	cy.visit('/playlists')
 	cy.contains('Delete').click()
 	cy.contains('Yes, Delete').click()
 	//cy.contains('Playlist was successfully destroyed')
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	cy.visit('/playlists')
 	cy.contains('Cypress Testing3').should('not.exist')	
   })
 
 
   //is able to delete playlist from edit playlist page
-  it('.delete_playlist_edit_page() - click on a DOM element', () => {
+  it('.delete_playlist_edit_page()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing4')
 	cy.get('#playlist_comment').type('Cypress testing4 comments')
-	cy.contains('Create').click()
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
+
+	cy.visit('/playlists')
 	cy.contains('Cypress Testing4').click()
 	//cy.contains('Delete')
 	cy.contains('Edit Playlist').click()
@@ -88,22 +111,29 @@ context('checks navigation after logging in', () => {
 	cy.contains('Delete Playlist').click()
 	cy.contains('Yes, Delete').click()
 	cy.contains('Playlist was successfully destroyed.')
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	cy.visit('/playlists')
 	cy.contains('Cypress Testing4').should('not.exist')
 	
   })
 
   //is able to create public playlist
-  it('.create_public_playlist() - click on a DOM element', () => {
+  it('.create_public_playlist()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing5')
 	cy.get('#playlist_comment').type('Cypress testing5 comments')
 	cy.contains('Public').click()
 
-	cy.contains('Create').click()
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
+
+	cy.visit('/playlists')
 
 	cy.contains('Cypress Testing5')
 	cy.contains('Public')
@@ -112,16 +142,23 @@ context('checks navigation after logging in', () => {
 
 
   //is able to edit playlist name and description
-  it('.edit_playlist_name() - click on a DOM element', () => {
+  it('.edit_playlist_name()', () => {
+		//cy.login('administrator')
+			cy.visit('/')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing5')
 	cy.get('#playlist_comment').type('Cypress testing5 comments')
 	cy.contains('Public').click()
-	cy.contains('Create').click()
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
 
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+
+	cy.visit('/playlists')
 
 	cy.contains('Cypress Testing5').click()
 	cy.contains('Edit Playlist').click()
@@ -137,16 +174,22 @@ context('checks navigation after logging in', () => {
 
 
   //is able to change public playlist to private
-  it('.edit_access_control() - click on a DOM element', () => {
+  it('.edit_access_control()', () => {
+		//cy.login('administrator')
+		cy.login('administrator')
+			cy.visit('/')
 	cy.contains('Playlists').click()
 	cy.contains('Create New Playlist').click()
-	cy.url().should('eq', 'https://spruce.dlib.indiana.edu/playlists/new')
+		//
+	cy.url().should('include', '/playlists/new')
 	cy.get('#playlist_title').type('Cypress Testing5')
 	cy.get('#playlist_comment').type('Cypress testing5 comments')
 	cy.contains('Public').click()
-	cy.contains('Create').click()
+	//cy.contains('Create').click()
+			cy.get('#playlist_form').submit()
 
-	cy.visit('https://spruce.dlib.indiana.edu/playlists')
+
+	cy.visit('/playlists')
 
 	cy.contains('Cypress Testing5').click()
 	cy.contains('Edit Playlist').click()
