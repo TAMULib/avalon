@@ -189,6 +189,7 @@ services:
       internal:
 
   cypress:
+    network_mode: host
     image: cypress/included:3.8.2
     depends_on:
       - avalon
@@ -197,5 +198,3 @@ services:
     volumes:
       - ./:/e2e
       - npms:/e2e/node_modules
-    networks:
-      internal:

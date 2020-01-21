@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://avalon:3000",
+  "baseUrl": "http://localhost:3000",
   "fixtureFolder": "spec/cypress/fixtures",
   "integrationFolder": "spec/cypress/integration",
   "pluginsFile": "spec/cypress/plugins/index.js",
