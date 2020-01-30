@@ -50,7 +50,7 @@ services:
       - FCREPO_USER=fedoraAdmin
       - FCREPO_PASSWORD=fedoraAdmin
       - FCREPO_URL=http://srv-fedora
-      - FCREPO_PORT=8984
+      - FCREPO_PORT=9000
       - DATABASE_NAME=avalon
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=Kap14lah!!
