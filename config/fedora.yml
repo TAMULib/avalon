@@ -1,15 +1,15 @@
 development:
   user: <%= ENV['FCREPO_USER'] %> 
   password: <%= ENV['FCREPO_PASSWORD'] %>
-  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fedora4/rest
+  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fcrepo/rest/<%= ENV['FEDORA_NAMESPACE'] %>
   base_path: /dev
 test:
   user: <%= ENV['FCREPO_USER'] %>
   password: <%= ENV['FCREPO_PASSWORD'] %>
-  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fedora4/rest
+  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fcrepo/rest/<%= ENV['FEDORA_NAMESPACE'] %>
   base_path: /test
 production:
   user: <%= ENV['FCREPO_USER'] %>
   password: <%= ENV['FCREPO_PASSWORD'] %>
-  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fedora4/rest
+  url: <%= ENV['FCREPO_URL'] %>:<%= ENV['FCREPO_PORT'] %>/fcrepo/rest/<%= ENV['FEDORA_NAMESPACE'] %>
   base_path: /prod
