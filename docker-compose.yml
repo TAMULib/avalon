@@ -40,22 +40,15 @@ services:
       - BUNDLE_FLAGS=--with development postgres --without production test
       - ENCODE_WORK_DIR=/tmp
       - CONTROLLED_VOCABULARY=config/controlled_vocabulary.yml
+      - DATABASE_URL=postgres://postgres@db/avalon
+      - FEDORA_NAMESPACE=avalon
+      - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
       - MEDIAINFO_PATH=/usr/bin/mediainfo
       - RAILS_ENV=development
       - SETTINGS__REDIS__HOST=redis
       - SETTINGS__REDIS__PORT=6379
       - SECRET_KEY_BASE=abcd
-      - SOLR_URL=http://srv-solr:8983/solr/avalon-core
-      - FEDORA_NAMESPACE=avalon      
-      - FCREPO_USER=fedoraAdmin
-      - FCREPO_PASSWORD=fedoraAdmin
-      - FCREPO_URL=http://srv-fedora
-      - FCREPO_PORT=8984
-      - DATABASE_NAME=avalon
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=Kap14lah!!
-      - DATABASE_HOST=srv-pgsql
-      - DATABASE_ADAPTER=postgresql
+      - SOLR_URL=http://solr:8983/solr/avalon
       - AWS_REGION=us-east-1
       - SETTINGS__FFMPEG__PATH=/usr/bin/ffmpeg
       - SETTINGS__MINIO__ENDPOINT=http://minio:9000
@@ -74,11 +67,6 @@ services:
       - SETTINGS__STREAMING__SERVER=nginx
       - SETTINGS__STREAMING__STREAM_TOKEN_TTL=20
       - SYSTEM_GROUPS=administrator,group_manager,manager
-      - DROPBOX_PATH=/srv/avalon/dropbox
-      - DROPBOX_UPLOAD_URI=sftp://avalon.example.edu 
-      - DOMAIN_HOST='http://localhost'
-      - DOMAIN_PORT=80 
-      - DOMAIN_PROTOCAL=http 
     volumes:
       - .:/home/app/avalon
       - npms:/home/app/avalon/node_modules
