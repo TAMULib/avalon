@@ -70,23 +70,15 @@ encode_throttling:
 auth:
   registerable: true
   configuration:
-    <% if ENV['LTI_AUTH_KEY'] %>
-    - :name: Avalon Lti OAuth
-      :provider: :lti
-      :hidden: true
-      :params:
-        :oauth_credentials:
-          <%= ENV['LTI_AUTH_KEY'] %>: <%= ENV['LTI_AUTH_SECRET'] %>
-    <% end %>
    - :name: TAMU LDAP
-      :logo: auth_provider_logo.png
-      :provider: :ldap
-      :params:
-        :method: :ssl
-        :uid: sAMAccountName
-        :host: adsdc1.library.tamu.edu
-        :port: 636
-        :bind_dn: <%= ENV['env_ldap_user'] %>
-        :password: <%= ENV['env_ldap_password'] %>
-        :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu    
+     :logo: auth_provider_logo.png
+     :provider: :ldap
+     :params:
+       :method: :ssl
+       :uid: sAMAccountName
+       :host: adsdc1.library.tamu.edu
+       :port: 636
+       :bind_dn: <%= ENV['env_ldap_user'] %>
+       :password: <%= ENV['env_ldap_password'] %>
+       :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu    
 # google_analytics_tracking_id: "someid"
