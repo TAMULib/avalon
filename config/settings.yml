@@ -1,23 +1,27 @@
 name: 'TAMU - Avalon Media System' # used in page titles
 domain:
-  host: localhost
-  port: 80
-  protocol: http
+  host: avalon-dev.library.tamu.edu
+  port: 443
+  protocol: https
 dropbox:
-  path: /srv/avalon/dropbox
-  upload_uri: sftp://avalon.example.edu
+  path: /mnt/avalon_dev/dropbox
+  upload_uri: \\cifs.library.tamu.edu/avalon_dev/dropbox/
 encoding:
   engine_adapter: ffmpeg
   presets_path: config/ffmpeg_presets.yml
+  working_file_path: '/mnt/avalon_dev/ingest'  
 mediainfo:
   path: '/usr/bin/mediainfo'
 ffmpeg:
-  path: '/usr/local/bin/ffmpeg'
+  path: '/usr/bin/ffmpeg'
 email:
-  mailer: :smtp
-  comments: 'avalon-comments@example.edu'
-  notification: 'avalon-notifications@example.edu'
-  support: 'avalon-support@example.edu'
+  comments: 'dhahn@library.tamu.edu'
+  notification: 'dhahn@library.tamu.edu'
+  support: 'dhahn@library.tamu.edu'
+  mailer:
+    smtp:  
+      address: 'relay.tamu.edu'
+      port: 25
 solr:
   configset: avalon
   configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
@@ -39,20 +43,20 @@ solr:
 zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
-  server: :generic
+  server: :nginx
+  http_base: 'https://kaltura-dev.library.tamu.edu/avalon'
   stream_token_ttl: 20 #minutes
-  content_path: '/srv/avalon/content'
-  rtmp_base: 'rtmp://localhost/avalon'
-  http_base: 'http://localhost:3000/streams'
+  content_path: '/mnt/avalon_dev/masterfiles'
+  rtmp_base: 'rtmp://avalon-dev.library.tamu.edu/avalon'
   default_quality: 'auto'
 redis:
-  host: localhost
+  host: <%= ENV['env_redis_host'] %>
   port: 6379
+master_file_management:
+  strategy: 'move' #'delete', or 'move' (for move uncomment and configure next line)
+  path: '/mnt/avalon_dev/avalon-archive' 
 groups:
   system_groups: [administrator, group_manager, manager]
-master_file_management:
-  strategy: 'none' #'delete', or 'move' (for move uncomment and configure next line)
-  #path: '/path/to/move/to'
 bib_retriever:
   default:
     protocol: sru
@@ -67,18 +71,30 @@ encode_throttling:
   create_jobs_spacing: 5
   update_jobs_throttle_threshold: 3
   update_jobs_spacing: 10
+timeliner:
+  timeliner_url: https://avalon-dev.library.tamu.edu/timeliner  
 auth:
   registerable: true
   configuration:
-   - :name: TAMU LDAP
-     :logo: auth_provider_logo.png
-     :provider: :ldap
-     :params:
-       :method: :ssl
-       :uid: sAMAccountName
-       :host: adsdc1.library.tamu.edu
-       :port: 636
-       :bind_dn: <%= ENV['env_ldap_user'] %>
-       :password: <%= ENV['env_ldap_password'] %>
-       :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu    
+    <% if ENV['LTI_AUTH_KEY'] %>
+    - :name: Avalon Lti OAuth
+      :provider: :lti
+      :hidden: true
+      :params:
+        :oauth_credentials:
+          <%= ENV['LTI_AUTH_KEY'] %>: <%= ENV['LTI_AUTH_SECRET'] %>
+    <% end %>
+    <% if ENV['env_ldap_password'] %>    
+    - :name: TAMU LDAP
+      :logo: auth_provider_logo.png
+      :provider: :ldap
+      :params:
+        :method: :ssl
+        :uid: sAMAccountName
+        :host: adsdc1.library.tamu.edu
+        :port: 636
+        :bind_dn: <%= ENV['env_ldap_user'] %>
+        :password: <%= ENV['env_ldap_password'] %>
+        :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu
+    <% end %>
 # google_analytics_tracking_id: "someid"
