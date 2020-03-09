@@ -14,7 +14,7 @@ Unless required by applicable law or agreed to in writing, software distributed
 ---  END LICENSE_HEADER BLOCK  ---
 %>
 
-<div id="footer" class="<%= "homepage-footer" if current_page?(main_app.root_path) %>">
+<div id="footer" class="homepage-footer">
 
   <footer class="container">
     <div class="separator"></div>
@@ -27,7 +27,6 @@ Unless required by applicable law or agreed to in writing, software distributed
 		<li><a href="https://askus.library.tamu.edu/contact/index">Comments</a></li>
 		<li><a href="https://library.tamu.edu/status/">Services Status</a></li>
 		<li><%= render 'modules/user_management' %></li>
-		<li>ver: <%=release_text%> <%= git_commit_info(" (%s %s [%s])") if Rails.env == 'development' %></li>
 
     </ul>
   </footer>

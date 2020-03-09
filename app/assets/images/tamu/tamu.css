@@ -34,7 +34,7 @@
 
 #footer.homepage-footer {
 	background: #3c0000;
-    padding: 20px 0 0;
+    padding: 0px 0px 0px 0px;
 }
 
 .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
@@ -49,6 +49,10 @@
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
     color: #500000;
     background-color: #ffcf08;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    color: #333333;
 }
 
 .btn-primary {
