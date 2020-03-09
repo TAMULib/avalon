@@ -1,139 +1,64 @@
-/* global navigation*/
- .global-nav {
-	 background: #3c0000;
+#header-navbar .navbar-brand {
+    background: transparent "tamu-logo-with-bar.png" no-repeat top left;
+    background: transparent url(/assets/tamu/tamu-logo-with-bar.png) no-repeat top left;
+	margin-top: 10px;
+    margin-bottom: -10px;
 }
- .nav-content {
-	 max-width: 62.5rem;
+
+#header-navbar .navbar-toggle, #header-navbar .facets-toggle {
+    background: #ffcf08;
 }
- .tamu-lib a {
-	display: block;
-	padding-left: 55px;
-	background: url(/assets/tamu/tamu-logo-with-bar.png) no-repeat;
-	width: auto;
-	text-indent: 0%;
-	margin: auto;
-	font-family: 'Lato', sans-serif;
-	font-size: 18px;
-	font-style: normal;
-	font-variant: normal;
-	color: white !important;
-	 
+
+.container > .navbar-header, .container > .navbar-collapse, .container > #facet-panel-collapse, .container > div[id*='facet-panel-'], .container-fluid > .navbar-header, .container-fluid > .navbar-collapse, .container-fluid > #facet-panel-collapse, .container-fluid > div[id*='facet-panel-'] {
+	background-color: #3c0000;
 }
- .tamu-lib a:hover{
-	 text-decoration: none !important;
-}
- .tamu-lib a:visited{
-	 color: #white !important;
-}
+
 .custom-header {
     background-color: #3c0000;
-    margin-bottom: 0em;
 	padding: 0px 0px 0px 0px;
 }
 
-footer {
-    background: #3c0000;
-    padding: 0px 0px 0px 0px;
-}
-footer a, footer li, footer p {
-    font-size: 12px;
-    color: white !important;
-}
-footer li:before {
-    content: "";
-}
-.footerList li {
-    list-style: none !important;
-    float: left !important;
-    margin-left: 1.375rem;
-    display: block;
-	text-align: center; 
+.navbar-default {
+	background: #3c0000;
+    border-top: 1px solid #8d8d8d;
 }
 
-.tamu_footer {
-	display: flex;
-    justify-content: center;
-}
-
-.panel-success, .facet_limit-active {
-    border-color: #2B5D7D;
-}
-
-.sidenav h2 {
-margin: 0px;
-background-color: #f0f4f7;
-border-top-right-radius: 6px;
- border-top-left-radius: 6px;
- padding: 10px 0 10px 10px;
- font-weight: bold;
- font-size: 18px;
-}
-
-.appliedFilter .btn, .appliedFilter .facets-toggle{
-    background-color: #f0f4f7;
-    border-color: #2B5D7D;
-    font-size: 14px;
-}
-
-.panel-success > .panel-heading, .facet_limit-active > .panel-heading {
- color: #3c763d;
-}
-
-.navbar-brand>img {
-    display: block;
-    display: inline;
-}
-.navbar-right {
-    float: right !important;
-    margin-right: -15px;
-}
-
-.navbar-brand {
-    width: auto;
-    background: none;
-    text-indent: 0%;
-    margin: auto;
-    font-family: 'Lato', sans-serif;
-    font-size: 18px;
-    font-style: normal;
-    font-variant: normal;
+.navbar-title {
+	background: #3c0000;
     color: white;
-    height: 50px;
-    padding-top: 10px;
 }
 
-.tamu-btn-info {
-
-}
-
-.tamu-btn {
-    display: inline-block;
-    margin-bottom: 0;
-    font-weight: normal;
-    text-align: center;
-    vertical-align: middle;
-    touch-action: manipulation;
-    cursor: pointer;
-    background-image: none;
-    border: 1px solid transparent;
-    white-space: nowrap;
-    line-height: 1.42857143;
-    border-radius: 2px;
-    user-select: none;
-}
-
-.nav>li>a {
-    color: #eee;
-}
-
-.nav>li>a:hover, .nav>li>a:focus {
-	color: #000;
-    background-color: #ffc222;
+.header-wrapper .header-logo > a:hover {
     text-decoration: none;
 }
 
-.navbar-default {
+#footer.homepage-footer {
+	background: #3c0000;
+    padding: 20px 0 0;
+}
+
+.navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #500000;
+    background-color: #ffcf08;
+}
+	
+.navbar-default .navbar-nav > li > a {
+    color: white;
+}	
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #500000;
+    background-color: #ffcf08;
+}
+
+.btn-primary {
+    color: white;
     background-color: #500000;
     border-color: #500000;
-	border-top: 1px solid #8d8d8d;
+}
+
+.btn-primary:hover {
+    color: white;
+    background-color: #3c0000;
+    border-color: #3c0000;
 }
