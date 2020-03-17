@@ -10,7 +10,7 @@
 }
 
 .container > .navbar-header, .container > .navbar-collapse, .container > #facet-panel-collapse, .container > div[id*='facet-panel-'], .container-fluid > .navbar-header, .container-fluid > .navbar-collapse, .container-fluid > #facet-panel-collapse, .container-fluid > div[id*='facet-panel-'] {
-	background-color: #3c0000;
+	background-color: #500000;
 }
 
 .custom-header {
@@ -19,8 +19,12 @@
 }
 
 .navbar-default {
-	background: #3c0000;
+	background: #500000;
     border-top: 1px solid #8d8d8d;
+}
+
+.navbar-right {
+    background: #3c0000;
 }
 
 .navbar-title {
