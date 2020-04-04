@@ -16,12 +16,13 @@ ffmpeg:
   path: '/usr/bin/ffmpeg'
 email:
   mailer: :smtp
-  config:  
-    address: 'relay.tamu.edu'
+  config:
+    address: mail-relay.university.edu
     port: 25
-  comments: 'dhahn@library.tamu.edu'
-  notification: 'dhahn@library.tamu.edu'
-  support: 'dhahn@library.tamu.edu'
+    enable_starttls_auto: false
+  comments: 'avalon-comments@example.edu'
+  notification: 'avalon-notifications@example.edu'
+  support: 'avalon-support@example.edu'
 solr:
   configset: avalon
   configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
