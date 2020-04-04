@@ -13,25 +13,27 @@ Unless required by applicable law or agreed to in writing, software distributed
   specific language governing permissions and limitations under the License.
 ---  END LICENSE_HEADER BLOCK  ---
 %>
+<link rel="stylesheet" media="all" href="/assets/tamu/tamu.css" />
 <div class="custom-header">
   <div class="container">
     <header class="header-wrapper">
       <div class="header-logo">
         <%= link_to main_app.root_path do %>
-        <%= image_tag "Home.png", class: "img-responvies", alt: "Avalon Media System - #{t(:release_label)} #{Avalon::VERSION}" %>
+        <%= image_tag "tamu/tamu-logo-with-bar.png", class: "img-responvies", alt: "Texas A&amp;M University Libraries Logo" %>
+		<span class="navbar-title">Texas A&amp;M University Libraries - Audio & Video Repository</span> 
         <% end %>
       </div>
 
-      <% unless current_page?(main_app.root_path) %>
-      <div class="header-search">
-        <%= render :partial=>'modules/avalon_search_form' %>
-      </div>
-      <% end %>
+	  <div>
+		<div class="navbar-default navbar-right">
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="http://askus.library.tamu.edu">Help</a>
+				</li>
+			</ul>
+		</div>
+	  </div>
 
-      <%# By default shift log in / log out to the header %>
-      <div class="text-right log-in-out text-muted header-user">
-        <%= render 'modules/user_management' %>
-      </div>
     </header>
   </div>
 </div>

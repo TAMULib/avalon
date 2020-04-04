@@ -19,7 +19,7 @@ module ApplicationHelper
   end
 
   def release_text
-    "#{application_name} #{t(:release_label)} #{Avalon::VERSION}"
+    "#{Avalon::VERSION}"
   end
 
   def share_link_for(obj, only_path: false)
