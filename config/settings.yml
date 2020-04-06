@@ -20,9 +20,10 @@ email:
     address: mail-relay.university.edu
     port: 25
     enable_starttls_auto: false
-  comments: 'avalon-comments@example.edu'
-  notification: 'avalon-notifications@example.edu'
-  support: 'avalon-support@example.edu'
+    comments: 'dhahn@library.tamu.edu'
+    notification: 'dhahn@library.tamu.edu'
+    support: 'dhahn@library.tamu.edu'
+
 solr:
   configset: avalon
   configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
