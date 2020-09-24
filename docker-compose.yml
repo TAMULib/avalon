@@ -1,6 +1,9 @@
-version: '3.2'
+version: '3.4'
 
 volumes:
+  database:
+  fedora:
+  solr:
   npms:
   data:
 
@@ -9,6 +12,52 @@ networks:
   external:
 
 services:
+  db: &db-avalon
+    image: postgres:10-alpine
+    volumes:
+      - database:/data
+    environment:
+      - PGDATA=/data
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=avalon
+      - POSTGRES_PASSWORD=password
+    networks:
+      internal:
+  db-test:
+    <<: *db-avalon
+    volumes: []
+
+  fedora: &fedora
+    image: avalonmediasystem/fedora:4.7.5
+    depends_on:
+      - db
+    volumes:
+      - fedora:/data
+    environment:
+      - JAVA_OPTIONS=-Dfcrepo.modeshape.configuration=classpath:/config/file-simple/repository.json -Dfcrepo.home=/data
+    networks:
+      internal:
+  fedora-test:
+    <<: *fedora
+    volumes: []
+
+  solr: &solr
+    image: solr:6.6.4-alpine
+    volumes:
+      - ./solr/config:/opt/solr/avalon_conf
+      - solr:/opt/solr/server/solr/mycores
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - avalon
+      - /opt/solr/avalon_conf
+    networks:
+      internal:
+  solr-test:
+    <<: *solr
+    volumes:
+      - ./solr/config:/opt/solr/avalon_conf
+
   hls:
     image: avalonmediasystem/nginx:minio
     environment:
@@ -24,23 +73,29 @@ services:
     image: redis:alpine
     networks:
       internal:
+  redis-test:
+    <<: *redis
 
   avalon: &avalon
-    image: avalonmediasystem/avalon:7.0-slim-dev-20200106
-    build: .
+    image: avalonmediasystem/avalon:7.1-slim-dev-20200324
+    build:
+      context: .
+      target: dev
     command: bash -c "/docker_init.sh && rails server -b 0.0.0.0"
     depends_on:
+      - db
+      - fedora
+      - solr
       - redis
       - hls
       - minio
     environment:
       - APP_NAME=avalon
-      - AVALON_BRANCH=develop
       - SETTINGS__DOMAIN=http://localhost:3000
       - BUNDLE_FLAGS=--with development postgres --without production test
       - ENCODE_WORK_DIR=/tmp
       - CONTROLLED_VOCABULARY=config/controlled_vocabulary.yml
-      - DATABASE_URL=postgres://postgres@db/avalon
+      - DATABASE_URL=postgres://postgres:password@db/avalon
       - FEDORA_NAMESPACE=avalon
       - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
       - MEDIAINFO_PATH=/usr/bin/mediainfo
@@ -61,14 +116,12 @@ services:
       - SETTINGS__DROPBOX__UPLOAD_URI=s3://masterfiles/dropbox/
       - SETTINGS__MASTER_FILE_MANAGEMENT__PATH=s3://preserves/
       - SETTINGS__MASTER_FILE_MANAGEMENT__STRATEGY=MOVE
-      - SETTINGS__STREAMING__CONTENT_PATH=/derivatives/
+      - SETTINGS__STREAMING__CONTENT_PATH=/
       - SETTINGS__STREAMING__STREAM_DEFAULT_QUALITY=medium
       - SETTINGS__STREAMING__HTTP_BASE=http://localhost:8880/avalon
       - SETTINGS__STREAMING__SERVER=nginx
       - SETTINGS__STREAMING__STREAM_TOKEN_TTL=20
       - SYSTEM_GROUPS=administrator,group_manager,manager
-      - env_ldap_user=${LDAP_USER}
-      - env_ldap_password=${LDAP_PASSWORD}
     volumes:
       - .:/home/app/avalon
       - npms:/home/app/avalon/node_modules
@@ -79,6 +132,25 @@ services:
       external:
     stdin_open: true
     tty: true
+
+  test:
+    <<: *avalon
+    command: >
+      bash -c "/docker_init.sh && tail -f /dev/null"
+    depends_on:
+      - db-test
+      - fedora-test
+      - solr-test
+      - redis-test
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db-test/avalon
+      - REDIS_HOST=redis-test
+      - FEDORA_URL=http://fedora-test:8080/fedora/rest
+      - SOLR_URL=http://solr-test:8983/solr/avalon
+      - RAILS_ENV=test
+      - BUNDLE_FLAGS=--with aws test postgres --without production
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+    ports: []
 
   worker:
     <<: *avalon
@@ -111,9 +183,20 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 minio minio123;
-      /usr/bin/mc mb -p myminio/masterfiles myminio/derivatives;
+      /usr/bin/mc mb -p myminio/fcrepo myminio/masterfiles myminio/derivatives;
       /usr/bin/mc policy set download myminio/derivatives;
       exit 0;
       "
     networks:
       internal:
+
+  cypress:
+    network_mode: host
+    image: cypress/included:3.8.2
+    depends_on:
+      - avalon
+    entrypoint: cypress run -C spec/cypress/cypress.json
+    working_dir: /e2e
+    volumes:
+      - ./:/e2e
+      - npms:/e2e/node_modules

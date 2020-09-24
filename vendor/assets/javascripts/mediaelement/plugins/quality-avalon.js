@@ -95,6 +95,10 @@
                 var keyExist = t.keyExist(qualityMap, value);
                 if (keyExist) {
                   label = value;
+                } else if(t.keyExist(qualityMap, 'auto')) {
+                  // When default quality src is not present, but 'auto'
+                  // quality src is available
+                  label = 'auto';
                 } else {
                   var keyValue = t.getMapIndex(qualityMap, 0);
                   label = keyValue.key;
@@ -229,6 +233,9 @@
               radio.addEventListener('change', function() {
                 var self = this,
                   newQuality = self.value;
+
+                // Set new quality value in localStorage
+                window.localStorage.setItem('quality', newQuality);
 
                 var selected = player.qualitiesButton.querySelectorAll(
                   '.' + t.options.classPrefix + 'qualities-selected'
@@ -370,9 +377,8 @@
           keyExist: function keyExist(map, searchKey) {
             return -1 < map.get('map_keys_1').indexOf(searchKey.toLowerCase());
           },
-          isMobile() {
-            var { isAndroid, isiOS } = mejs.Features;
-            return isAndroid || isiOS;
+          isMobile: function isMobile() {
+            return mejs.Features.isAndroid || mejs.Features.isiOS;
           }
         });
       },

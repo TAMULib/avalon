@@ -56,6 +56,7 @@ describe Admin::CollectionsController, type: :controller do
           expect(patch :update, params: { id: collection.id }).to redirect_to(root_path)
           expect(delete :destroy, params: { id: collection.id }).to redirect_to(root_path)
           expect(post :attach_poster, params: { id: collection.id }).to redirect_to(root_path)
+          expect(delete :remove_poster, params: { id: collection.id }).to redirect_to(root_path)
           expect(get :poster, params: { id: collection.id }).to redirect_to(root_path)
         end
       end
@@ -92,6 +93,17 @@ describe Admin::CollectionsController, type: :controller do
       put 'update', params: { id: collection.id, remove_manager: manager.user_key }
       collection.reload
       expect(manager).not_to be_in(collection.managers)
+    end
+
+    context 'with zero-width characters' do
+      let(:manager) { FactoryBot.create(:manager) }
+      let(:manager_key) { "#{manager.user_key}\u200B" }
+
+      it "should add users to manager role" do
+        put 'update', params: { id: collection.id, submit_add_manager: 'Add', add_manager: manager_key }
+        collection.reload
+        expect(manager).to be_in(collection.managers)
+      end
     end
   end
 
@@ -273,9 +285,13 @@ describe Admin::CollectionsController, type: :controller do
       # post 'create', format:'json', admin_collection: {name: collection.name, description: collection.description, unit: collection.unit, managers: collection.managers}
     end
     it "should create a new collection" do
-      post 'create', params: { format:'json', admin_collection: {name: collection.name, description: collection.description, unit: collection.unit, managers: collection.managers} }
+      post 'create', params: { format:'json', admin_collection: {name: collection.name, description: collection.description, unit: collection.unit, contact_email: collection.contact_email, website_label: collection.website_label, website_url: collection.website_url, managers: collection.managers} }
       expect(JSON.parse(response.body)['id'].class).to eq String
       expect(JSON.parse(response.body)).not_to include('errors')
+      new_collection = Admin::Collection.find(JSON.parse(response.body)['id'])
+      expect(new_collection.contact_email).to eq collection.contact_email
+      expect(new_collection.website_label).to eq collection.website_label
+      expect(new_collection.website_url).to eq collection.website_url
     end
     it "should create a new collection with default manager list containing current API user" do
       post 'create', params: { format:'json', admin_collection: { name: collection.name, description: collection.description, unit: collection.unit } }
@@ -306,6 +322,10 @@ describe Admin::CollectionsController, type: :controller do
 
     context "update REST API" do
       let!(:collection) { FactoryBot.create(:collection)}
+      let(:contact_email) { Faker::Internet.email }
+      let(:website_label) { Faker::Lorem.words.join(' ') }
+      let(:website_url) { Faker::Internet.url }
+
       before do
         ApiToken.create token: 'secret_token', username: 'archivist1@example.com', email: 'archivist1@example.com'
         request.headers['Avalon-Api-Key'] = 'secret_token'
@@ -313,11 +333,14 @@ describe Admin::CollectionsController, type: :controller do
 
       it "should update a collection via API" do
         old_description = collection.description
-        put 'update', params: { format: 'json', id: collection.id, admin_collection: {description: collection.description+'new'} }
+        put 'update', params: { format: 'json', id: collection.id, admin_collection: { description: collection.description+'new', contact_email: contact_email, website_label: website_label, website_url: website_url }}
         expect(JSON.parse(response.body)['id'].class).to eq String
         expect(JSON.parse(response.body)).not_to include('errors')
         collection.reload
         expect(collection.description).to eq old_description+'new'
+        expect(collection.contact_email).to eq contact_email
+        expect(collection.website_label).to eq website_label
+        expect(collection.website_url).to eq website_url
       end
       it "should return 422 if collection update via API failed" do
         allow_any_instance_of(Admin::Collection).to receive(:save).and_return false
@@ -360,59 +383,68 @@ describe Admin::CollectionsController, type: :controller do
   end
 
   describe '#attach_poster' do
-    context 'adding a poster' do
-      let(:collection) { FactoryBot.create(:collection) }
-      let(:resized_poster_data) { "image data" }
+    let(:collection) { FactoryBot.create(:collection) }
 
-      before do
-        login_user collection.managers.first
-        allow(controller).to receive(:resize_uploaded_poster).and_return(resized_poster_data)
-      end
+    before do
+      login_user collection.managers.first
+    end
 
-      it 'adds the poster' do
-        file = fixture_file_upload('/collection_poster.jpg', 'image/jpeg')
-        expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.to change { collection.reload.poster.present? }.from(false).to(true)
-        expect(collection.poster.mime_type).to eq 'image/png'
-        expect(collection.poster.original_name).to eq 'collection_poster.jpg'
-        expect(collection.poster.content).not_to be_blank
+    it 'adds the poster' do
+      file = fixture_file_upload('/collection_poster.png', 'image/png')
+      expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.to change { collection.reload.poster.present? }.from(false).to(true)
+      expect(collection.poster.mime_type).to eq 'image/png'
+      expect(collection.poster.original_name).to eq 'collection_poster.png'
+      expect(collection.poster.content).not_to be_blank
+      expect(response).to redirect_to(admin_collection_path(collection))
+      expect(flash[:success]).not_to be_empty
+    end
+
+    context 'with an invalid file' do
+
+      it 'displays an error when the file is not an image' do
+        file = fixture_file_upload('/captions.vtt', 'text/vtt')
+        expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.not_to change { collection.reload.poster.present? }
         expect(response).to redirect_to(admin_collection_path(collection))
-      end
-
-      context 'with an invalid file' do
-        let(:resized_poster_data) { nil }
-
-        it 'displays an error when the file is not an image' do
-          file = fixture_file_upload('/captions.vtt', 'text/vtt')
-          expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.not_to change { collection.reload.poster.present? }
-          expect(flash[:error]).not_to be_empty
-          expect(response).to redirect_to(admin_collection_path(collection))
-        end
-      end
-
-      context 'when saving fails' do
-        before do
-          allow_any_instance_of(Admin::Collection).to receive(:save).and_return(false)
-        end
-  
-        it 'returns an error' do
-          file = fixture_file_upload('/collection_poster.jpg', 'image/jpeg')
-          expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.not_to change { collection.reload.poster.present? }
-          expect(flash[:error]).not_to be_empty
-          expect(response).to redirect_to(admin_collection_path(collection))
-        end
+        expect(flash[:error]).not_to be_empty
       end
     end
 
-    context 'removing a poster' do
-      let(:collection) { FactoryBot.create(:collection, :with_poster) }
-
+    context 'when saving fails' do
       before do
-        login_user collection.managers.first
+        allow_any_instance_of(Admin::Collection).to receive(:save).and_return(false)
       end
 
-      it 'removes the poster' do
-        expect { post :attach_poster, params: { id: collection.id } }.to change { collection.reload.poster.present? }.from(true).to(false)
+      it 'returns an error' do
+        file = fixture_file_upload('/collection_poster.png', 'image/png')
+        expect { post :attach_poster, params: { id: collection.id, admin_collection: { poster: file } } }.not_to change { collection.reload.poster.present? }
+        expect(flash[:error]).not_to be_empty
         expect(response).to redirect_to(admin_collection_path(collection))
+      end
+    end
+  end
+
+  describe '#remove_poster' do
+    let(:collection) { FactoryBot.create(:collection, :with_poster) }
+
+    before do
+      login_user collection.managers.first
+    end
+
+    it 'removes the poster' do
+      expect { delete :remove_poster, params: { id: collection.id } }.to change { collection.reload.poster.present? }.from(true).to(false)
+      expect(response).to redirect_to(admin_collection_path(collection))
+      expect(flash[:success]).not_to be_empty
+    end
+
+    context 'when saving fails' do
+      before do
+        allow_any_instance_of(Admin::Collection).to receive(:save).and_return(false)
+      end
+
+      it 'returns an error' do
+        expect { delete :remove_poster, params: { id: collection.id } }.not_to change { collection.reload.poster.present? }
+        expect(response).to redirect_to(admin_collection_path(collection))
+        expect(flash[:error]).not_to be_empty
       end
     end
   end

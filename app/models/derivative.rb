@@ -63,7 +63,7 @@ class Derivative < ActiveFedora::Base
     index.as :displayable
   end
 
-  # before_destroy :retract_distributed_files!
+  around_destroy :delete_file!
 
   def initialize(*args)
     super(*args)
@@ -110,6 +110,9 @@ class Derivative < ActiveFedora::Base
 
     # FIXME: Transform to stream url here? How do we distribute to the streaming server?
     derivative.location_url = output[:url]
+    # For Intercom push
+    derivative.hls_url = output[:hls_url] if output[:hls_url].present?
+
     derivative.absolute_location = output[:url]
 
     derivative
@@ -121,9 +124,10 @@ class Derivative < ActiveFedora::Base
 
   private
 
-  # TODO: move this into a service class
-  def retract_distributed_files!
-    # no-op in latest ActiveEncode
-    # TODO: Implement this in a different way outside of ActiveEncode
-  end
+    def delete_file!
+      loc = absolute_location
+      man = managed
+      yield
+      DeleteDerivativeJob.perform_later(loc) if man
+    end
 end

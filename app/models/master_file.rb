@@ -369,8 +369,8 @@ class MasterFile < ActiveFedora::Base
 
   def extract_still(options={})
     default_frame_sizes = {
-      'poster'    => '1024x768',
-      'thumbnail' => '160x120'
+      'poster'    => '1280x720',
+      'thumbnail' => '640x360'
     }
 
     result = nil
@@ -467,6 +467,12 @@ class MasterFile < ActiveFedora::Base
     else
       "#{prefix}-#{File.basename(oldpath)}"
     end
+  end
+
+  def has_audio?
+    # The MasterFile doesn't have an audio track unless the first derivative does
+    # This is useful to skip unnecessary waveform generation
+    derivatives.any?(&:audio_codec)
   end
 
   def has_poster?
@@ -586,8 +592,7 @@ class MasterFile < ActiveFedora::Base
     frame_size = (options[:size].nil? or options[:size] == 'auto') ? self.original_frame_size : options[:size]
 
     (new_width,new_height) = frame_size.split(/x/).collect(&:to_f)
-    new_height = (new_width/self.display_aspect_ratio.to_f).floor
-    new_height += 1 if new_height.odd?
+    new_height = (new_width/self.display_aspect_ratio.to_f).round
     frame_source = find_frame_source(offset: offset)
     data = get_ffmpeg_frame_data(frame_source, new_width, new_height)
     raise RuntimeError, "Frame extraction failed. See log for details." if data.empty?
@@ -614,7 +619,7 @@ class MasterFile < ActiveFedora::Base
           '-s',       "#{new_width.to_i}x#{new_height.to_i}",
           '-vframes', '1',
           '-aspect',  aspect.to_s,
-          '-f',       'image2',
+          '-q:v',       '4',
           '-y',       jpeg.path
         ]
         if frame_source[:master]
@@ -726,7 +731,8 @@ class MasterFile < ActiveFedora::Base
   end
 
   def find_encoder_class(klass_name)
-    ActiveEncode::Base.descendants.find { |c| c.name == klass_name }
+    klass = klass_name&.safe_constantize
+    klass if klass&.ancestors&.include?(ActiveEncode::Base)
   end
 
   def stop_processing!

@@ -12,23 +12,12 @@
 #   specific language governing permissions and limitations under the License.
 # ---  END LICENSE_HEADER BLOCK  ---
 
-require 'rails_helper.rb'
+module StringAdditions
+  ZERO_WIDTH_CHARS = ["\u200B", "\u200C", "\u200D", "\uFEFF", "\u2060"].freeze
 
-describe 'Admin::CollectionsController' do
-  describe 'resize_uploaded_poster' do
-    let(:uploaded_file) { fixture_file_upload('/collection_poster.jpg', 'image/jpeg') }
-    let(:controller) { Admin::CollectionsController.new }
-
-    it 'successfully runs mini_magick' do
-      expect(controller.send(:resize_uploaded_poster, uploaded_file.path)).not_to be_empty
-    end
-
-    context 'when passed an invalid file' do
-      let(:uploaded_file) { fixture_file_upload('/captions.vtt', 'text/vtt') }
-
-      it 'returns nil' do
-        expect(controller.send(:resize_uploaded_poster, uploaded_file.path)).to be_nil
-      end
-    end
+  # Removes zero-width character from beginning and end of string
+  def remove_zero_width_chars
+    gsub(/^[#{String::ZERO_WIDTH_CHARS.join}]/, '').gsub(/[#{String::ZERO_WIDTH_CHARS.join}]$/, '')
   end
 end
+String.prepend(StringAdditions)

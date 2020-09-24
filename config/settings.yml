@@ -19,6 +19,7 @@ email:
   config:  
     address: 'relay.tamu.edu'
     port: 25
+    enable_starttls_auto: false
   comments: 'dhahn@library.tamu.edu'
   notification: 'dhahn@library.tamu.edu'
   support: 'dhahn@library.tamu.edu'
