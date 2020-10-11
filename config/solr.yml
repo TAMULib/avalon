@@ -4,4 +4,4 @@ development:
 test:
   url: http://127.0.0.1:<%= ENV['SOLR_TEST_PORT'] || 8985 %>/solr/hydra-test
 production:
-  url: http://{{SOLR_HOST}}:{{SOLR_PORT}}/solr/{{SOLR_BASE_PATH}}
+  url: http://{{SOLR_HOST_YML}}:{{SOLR_PORT_YML}}/solr/{{SOLR_BASE_PATH_YML}}
