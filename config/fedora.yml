@@ -11,5 +11,5 @@ test:
 production:
   user: {{FEDORA_USER_YML}}
   password: {{FEDORA_PASSWORD_YML}}
-  url: http://{{FEDORA_HOST_YML}}:{{FEDORA_PORT_YML}/fedora/rest
+  url: http://{{FEDORA_HOST_YML}}:{{FEDORA_PORT_YML}}/fedora/rest
   base_path: /{{FEDORA_BASE_PATH_YML}}
