@@ -1,15 +1,15 @@
 name: 'TAMU - Avalon Media System' # used in page titles
 domain:
-  host: <%= ENV['env_avalon_hostname %>
-  port: <%= ENV['env_avalon_port %>
-  protocol: <%= ENV['env_avalon_protocol %>
+  host: <%= ENV['env_avalon_hostname'] %>
+  port: <%= ENV['env_avalon_port'] %>
+  protocol: <%= ENV['env_avalon_protocol'] %>
 dropbox:
-  path: <%= ENV['env_dropbox_path %>
-  upload_uri: <%= ENV['env_dropbox_upload_uri %>
+  path: <%= ENV['env_dropbox_path'] %>
+  upload_uri: <%= ENV['env_dropbox_upload_uri'] %>
 encoding:
   engine_adapter: ffmpeg
   presets_path: config/ffmpeg_presets.yml
-  working_file_path: '<%= ENV['env_encoding_working_file_path %>'  
+  working_file_path: '<%= ENV['env_encoding_working_file_path'] %>'  
 mediainfo:
   path: '/usr/bin/mediainfo'
 ffmpeg:
@@ -20,9 +20,9 @@ email:
     address: 'relay.tamu.edu'
     port: 25
     enable_starttls_auto: false
-  comments: '<%= ENV['env_email_comments %>'
-  notification: '<%= ENV['env_email_notification %>'
-  support: '<%= ENV['env_email_support %>'
+  comments: '<%= ENV['env_email_comments'] %>'
+  notification: '<%= ENV['env_email_notification'] %>'
+  support: '<%= ENV['env_email_support'] %>'
 solr:
   configset: avalon
   configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
@@ -45,10 +45,10 @@ zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
   server: :nginx
-  http_base: '<%= ENV['env_http_base %>'
+  http_base: '<%= ENV['env_http_base'] %>'
   stream_token_ttl: 20 #minutes
-  content_path: '<%= ENV['env_streaming_content_path %>'
-  rtmp_base: '<%= ENV['env_streaming_rtmp_base %>'
+  content_path: '<%= ENV['env_streaming_content_path'] %>'
+  rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
   default_quality: 'auto'
 redis:
   host: <%= ENV['env_redis_host'] %>
