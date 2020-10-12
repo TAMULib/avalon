@@ -45,7 +45,7 @@ zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
   server: :nginx
-  http_base: '<%= ENV['env_http_base'] %>'
+  http_base: '<%= ENV['env_streaming_http_base'] %>'
   stream_token_ttl: 20 #minutes
   content_path: '<%= ENV['env_streaming_content_path'] %>'
   rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
