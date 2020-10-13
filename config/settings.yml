@@ -54,7 +54,7 @@ redis:
   host: <%= ENV['env_redis_host'] %>
   port: <%= ENV['env_redis_port'] %>
 master_file_management:
-  strategy: 'move' #'delete', or 'move' (for move uncomment and configure next line)
+  strategy: 'delete' #'delete', or 'move' (for move uncomment and configure next line)
   path: '/mnt/avalon/avalon-archive'  
 groups:
   system_groups: [administrator, group_manager, manager]
