@@ -24,7 +24,10 @@ test:
   pool: 20
   database: db/test.sqlite3
 
+
+# Increase the default pool size for large jobs.
+# DCH
 production:
   <<: *default
-  pool: 20
+  pool: 40
   database: db/production.sqlite3
