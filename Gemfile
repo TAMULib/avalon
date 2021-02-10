@@ -99,6 +99,7 @@ gem 'config'
 gem 'hooks'
 gem 'jbuilder', '~> 2.0'
 gem 'parallel'
+gem 'whenever', '~> 0.11', require: false
 gem 'with_locking'
 
 group :development do
