@@ -98,7 +98,7 @@ auth:
         :password: <%= ENV['env_ldap_password'] %>
         :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu
     <% end %>
-# google_analytics_tracking_id: "someid"
+google_analytics_tracking_id: "UA-54069646-12"
 supplemental_files:
   proxy: false
 waveform:
