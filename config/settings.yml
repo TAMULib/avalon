@@ -80,7 +80,7 @@ auth:
 #       :params:
 #         :oauth_credentials:
 #           somekey: somesecret
-# google_analytics_tracking_id: "someid"
+google_analytics_tracking_id: "UA-54069646-12"
 supplemental_files:
   proxy: false
 waveform:
