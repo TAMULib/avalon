@@ -51,8 +51,8 @@ streaming:
   rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
   default_quality: 'auto'
 redis:
-  host: <%= ENV['env_redis_host'] %>
-  port: <%= ENV['env_redis_port'] %>
+  host: '<%= ENV['env_redis_host'] %>'
+  port: '<%= ENV['env_redis_port'] %>'
 master_file_management:
   strategy: 'delete' #'delete', or 'move' (for move uncomment and configure next line)
   path: '/mnt/avalon/avalon-archive'  
