@@ -51,7 +51,9 @@ module Hydra::MultiplePolicyAwareAccessControlsEnforcement
       user_access_filters = []
       current_ability.user_groups.each_with_index do |group, i|
         permission_types.each do |type|
-          user_access_filters << "(" + escape_filter(Hydra.config.permissions.inheritable[type.to_sym].group, group) + policy_class_clause + ")"
+			if !group.nil? && !group.empty?
+				user_access_filters << "(" + escape_filter(Hydra.config.permissions.inheritable[type.to_sym].group, group) + policy_class_clause + ")"
+			end
         end
       end
       user_access_filters
