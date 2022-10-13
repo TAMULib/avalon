@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Core rails
 gem 'bootsnap', require: false
 gem 'listen'
-gem 'rails', '=5.2.4.4'
+gem 'rails', '=5.2.4.5'
 gem 'sprockets', '~>3.7.2'
 gem 'sqlite3'
 
@@ -36,7 +36,7 @@ gem 'rsolr', '~> 1.0'
 # Rails & Samvera Plugins
 gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6.5'
 gem 'active_annotations', '~> 0.2.2'
-gem 'activerecord-session_store'
+gem 'activerecord-session_store', '>= 2.0.0'
 gem 'acts_as_list'
 gem 'api-pagination'
 gem 'avalon-about', git: 'https://github.com/avalonmediasystem/avalon-about.git', tag: 'avalon-r6.4'
@@ -59,6 +59,7 @@ gem 'ims-lti', '~> 1.1.13'
 gem 'net-ldap'
 gem 'omniauth-identity'
 gem 'omniauth-lti', git: "https://github.com/avalonmediasystem/omniauth-lti.git", tag: 'avalon-r4'
+gem 'omniauth-ldap'				   
 
 # Media Access & Transcoding
 gem 'active_encode', '~> 0.7.0'
