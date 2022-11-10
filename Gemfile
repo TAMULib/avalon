@@ -60,10 +60,10 @@ gem 'devise', '~> 4.8'
 gem 'devise_invitable', '~> 2.0'
 gem 'ims-lti', '~> 1.1.13'
 gem 'net-ldap'
-gem 'omniauth', '~> 2.0'
-gem 'omniauth-identity', '>= 2.0.0'
+gem 'omniauth'
+gem 'omniauth-identity'
 gem 'omniauth-lti', git: "https://github.com/avalonmediasystem/omniauth-lti.git", tag: 'avalon-r4'
-gem "omniauth-saml", "~> 2.0"
+gem "omniauth-saml"
 gem 'omniauth-ldap'
 
 # Media Access & Transcoding
