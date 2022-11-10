@@ -1,31 +1,31 @@
-name: 'Avalon Media System' # used in page titles
+name: 'TAMU - Avalon Media System' # used in page titles
 domain:
-  host: localhost
-  port: 80
-  protocol: http
+  host: <%= ENV['env_avalon_hostname'] %>
+  port: <%= ENV['env_avalon_port'] %>
+  protocol: <%= ENV['env_avalon_protocol'] %>
 dropbox:
-  path: /srv/avalon/dropbox
-  upload_uri: sftp://avalon.example.edu
-  # google_drive:
+  path: <%= ENV['env_dropbox_path'] %>
+  upload_uri: <%= ENV['env_dropbox_upload_uri'] %>  # google_drive:
   #   client_id: id
   #   client_secret: secret
   #   redis_token_store_url: redis://host:port # if different from Avalon's Redis
 encoding:
   engine_adapter: ffmpeg
   presets_path: config/ffmpeg_presets.yml
+  working_file_path: '<%= ENV['env_encoding_working_file_path'] %>'  
 mediainfo:
   path: '/usr/bin/mediainfo --urlencode' # Fixes mediainfo v20.03 bug with S3 presigned URL
 ffmpeg:
   path: '/usr/local/bin/ffmpeg'
 email:
   mailer: :smtp
-  config:
-    address: mail-relay.university.edu
+  config:  
+    address: 'relay.tamu.edu'
     port: 25
     enable_starttls_auto: false
-  comments: 'avalon-comments@example.edu'
-  notification: 'avalon-notifications@example.edu'
-  support: 'avalon-support@example.edu'
+  comments: '<%= ENV['env_email_comments'] %>'
+  notification: '<%= ENV['env_email_notification'] %>'
+  support: '<%= ENV['env_email_support'] %>'
 solr:
   configset: avalon
   configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
@@ -47,16 +47,20 @@ solr:
 zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
-  server: :generic
+  server: :nginx
+  http_base: '<%= ENV['env_streaming_http_base'] %>'
   stream_token_ttl: 20 #minutes
-  content_path: '/srv/avalon/content'
-  rtmp_base: 'rtmp://localhost/avalon'
+  content_path: '<%= ENV['env_streaming_content_path'] %>'
+  rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
   http_base: 'http://localhost:3000/streams'
   default_quality: 'auto'
 redis:
-  host: localhost
-  port: 6379
+  host: '<%= ENV['env_redis_host'] %>'
+  port: '<%= ENV['env_redis_port'] %>'
   db: 0
+master_file_management:
+  strategy: 'delete' #'delete', or 'move' (for move uncomment and configure next line)
+  path: '/mnt/avalon/avalon-archive'  
 groups:
   system_groups: [administrator, group_manager, manager]
 master_file_management:
@@ -76,16 +80,34 @@ encode_throttling:
   create_jobs_spacing: 5
   update_jobs_throttle_threshold: 3
   update_jobs_spacing: 10
+timeliner:
+  timeliner_url: <%= ENV['env_timeliner_url'] %> 
 auth:
   registerable: true
-#   configuration:
-#     - :name: Avalon Lti OAuth
-#       :provider: :lti
-#       :hidden: true
-#       :params:
-#         :oauth_credentials:
-#           somekey: somesecret
-# google_analytics_tracking_id: "someid"
+  configuration:
+    <% if ENV['LTI_AUTH_KEY'] %>
+    - :name: Avalon Lti OAuth
+      :provider: :lti
+      :hidden: true
+      :params:
+        :oauth_credentials:
+          <%= ENV['LTI_AUTH_KEY'] %>: <%= ENV['LTI_AUTH_SECRET'] %>
+    <% end %>
+    <% if ENV['env_ldap_password'] %>    
+    - :name: TAMU LDAP
+      :logo: auth_provider_logo.png
+      :provider: :ldap
+      :params:
+        :method: :ssl
+        :uid: sAMAccountName
+        :host: adsdc1.library.tamu.edu
+        :port: 636
+        :bind_dn: <%= ENV['env_ldap_user'] %>
+        :password: <%= ENV['env_ldap_password'] %>
+        :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu
+    <% end %>
+google_analytics_tracking_id: "UA-54069646-12"
+
 supplemental_files:
   proxy: false
 waveform:

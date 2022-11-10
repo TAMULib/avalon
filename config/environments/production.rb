@@ -115,4 +115,7 @@ config.webpacker.check_yarn_integrity = false
 
   # Additional production specific initializers
   Dir["config/environments/production/*.rb"].each {|file| load file }
+
+# Override web console only working in DEV  
+#  config.web_console.development_only = false
 end
