@@ -1,11 +1,11 @@
-# Copyright 2011-2022, The Trustees of Indiana University and Northwestern
+# Copyright 2011-2020, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -192,29 +192,23 @@ class MasterFile < ActiveFedora::Base
     end
   end
 
-  def setContent(file, file_name: nil, file_size: nil, auth_header: nil, dropbox_dir: nil)
+  def setContent(file)
     case file
     when Hash #Multiple files for pre-transcoded derivatives
       saveDerivativesHash(file)
     when ActionDispatch::Http::UploadedFile #Web upload
-      saveOriginal(file, file.original_filename, dropbox_dir)
+      saveOriginal(file, file.original_filename)
     when URI, Addressable::URI
       case file.scheme
       when 'file'
-        saveOriginal(File.open(file.path), File.basename(file.path), dropbox_dir)
+        saveOriginal(File.open(file.path), File.basename(file.path))
       when 's3'
         self.file_location = file.to_s
         self.file_size = FileLocator::S3File.new(file).object.size
-      else
-        self.file_location = file.to_s
-        self.file_size = file_size
-        self.title = file_name
       end
     else #Batch
-      saveOriginal(file, File.basename(file.path), dropbox_dir)
+      saveOriginal(file, File.basename(file.path))
     end
-
-    @auth_header = auth_header
     reloadTechnicalMetadata!
   end
 
@@ -254,7 +248,7 @@ class MasterFile < ActiveFedora::Base
 
     return process_pass_through(file) if self.workflow_name == 'pass_through'
 
-    ActiveEncodeJobs::CreateEncodeJob.perform_later(input_path, id, headers: @auth_header)
+    ActiveEncodeJobs::CreateEncodeJob.perform_later(input_path, id)
   end
 
   def process_pass_through(file)
@@ -270,7 +264,7 @@ class MasterFile < ActiveFedora::Base
       options[:outputs] = [{ label: 'high', url: input }]
     end
 
-    ActiveEncodeJobs::CreateEncodeJob.perform_now(input, id, options)
+    ActiveEncodeJobs::CreateEncodeJob.perform_later(input, id, options)
   end
 
   def input_path
@@ -366,7 +360,7 @@ class MasterFile < ActiveFedora::Base
 
   def update_stills_from_offset!
     # Update stills together
-    ExtractStillJob.perform_later(id, type: 'both', offset: poster_offset, headers: @auth_header)
+    ExtractStillJob.perform_later(self.id, :type => 'both', :offset => self.poster_offset)
 
     # Update stills independently
     # @stills_to_update.each do |type|
@@ -470,9 +464,9 @@ class MasterFile < ActiveFedora::Base
   def self.post_processing_move_filename(oldpath, options = {})
     prefix = options[:id].tr(':', '_')
     if File.basename(oldpath).start_with?(prefix)
-      Avalon::Configuration.sanitize_filename.call(File.basename(oldpath))
+      File.basename(oldpath)
     else
-      Avalon::Configuration.sanitize_filename.call("#{prefix}-#{File.basename(oldpath)}")
+      "#{prefix}-#{File.basename(oldpath)}"
     end
   end
 
@@ -512,7 +506,7 @@ class MasterFile < ActiveFedora::Base
 
   def to_solr *args
     super.tap do |solr_doc|
-      solr_doc['file_size_ltsi'] = file_size if file_size.present?
+      solr_doc['file_size_ltsi'] = file_size
       solr_doc['has_captions?_bs'] = has_captions?
       solr_doc['has_waveform?_bs'] = has_waveform?
       solr_doc['has_poster?_bs'] = has_poster?
@@ -552,40 +546,37 @@ class MasterFile < ActiveFedora::Base
   protected
 
   def mediainfo
-    Mediainfo.new(FileLocator.new(file_location).location, headers: @auth_header)
+    @mediainfo ||= Mediainfo.new(FileLocator.new(file_location).location)
   end
 
   def find_frame_source(options={})
     options[:offset] ||= 2000
 
     source = FileLocator.new(working_file_path&.first || file_location)
-    options[:non_temp_file] = true
-    if source.source.blank? or (source.uri.scheme == 's3' and not source.exist?)
+    options[:master] = true
+    if source.source.nil? or (source.uri.scheme == 's3' and not source.exist?)
       source = FileLocator.new(self.derivatives.where(quality_ssi: 'high').first.absolute_location)
-      options[:non_temp_file] = true
+      options[:master] = false
     end
     response = { source: source&.location }.merge(options)
     return response if response[:source].to_s =~ %r(^https?://)
 
     unless File.exists?(response[:source])
       Rails.logger.warn("Masterfile `#{file_location}` not found. Extracting via HLS.")
-      hls_temp_file, new_offset = create_frame_source_hls_temp_file
-      response = { source: hls_temp_file, offset: new_offset, non_temp_file: false }
+      begin
+        playlist_url = self.stream_details[:stream_hls].find { |d| d[:quality] == 'high' }[:url]
+        secure_url = SecurityHandler.secure_url(playlist_url, target: self.id)
+        playlist = Avalon::M3U8Reader.read(secure_url)
+        details = playlist.at(options[:offset])
+
+        # Fixes https://github.com/avalonmediasystem/avalon/issues/3474
+        target_location = File.basename(details[:location]).split('?')[0]
+        target = File.join(Dir.tmpdir, target_location)
+        File.open(target,'wb') { |f| open(details[:location]) { |io| f.write(io.read) } }
+        response = { source: target, offset: details[:offset], master: false }
+      end
     end
     return response
-  end
-
-  def create_frame_source_hls_temp_file
-    playlist_url = self.stream_details[:stream_hls].find { |d| d[:quality] == 'high' }[:url]
-    secure_url = SecurityHandler.secure_url(playlist_url, target: self.id)
-    playlist = Avalon::M3U8Reader.read(secure_url)
-    details = playlist.at(options[:offset])
-
-    # Fixes https://github.com/avalonmediasystem/avalon/issues/3474
-    target_location = File.basename(details[:location]).split('?')[0]
-    target = File.join(Dir.tmpdir, target_location)
-    File.open(target,'wb') { |f| open(details[:location]) { |io| f.write(io.read) } }
-    return target, details[:offset]
   end
 
   def extract_frame(options={})
@@ -601,17 +592,18 @@ class MasterFile < ActiveFedora::Base
     (new_width,new_height) = frame_size.split(/x/).collect(&:to_f)
     new_height = (new_width/self.display_aspect_ratio.to_f).round
     frame_source = find_frame_source(offset: offset)
-    data = get_ffmpeg_frame_data(frame_source, new_width, new_height, options[:headers])
+    data = get_ffmpeg_frame_data(frame_source, new_width, new_height)
     raise RuntimeError, "Frame extraction failed. See log for details." if data.empty?
     data
   end
 
-  def get_ffmpeg_frame_data(frame_source, new_width, new_height, headers)
+  def get_ffmpeg_frame_data frame_source, new_width, new_height
     ffmpeg = Settings.ffmpeg.path
     unless File.executable?(ffmpeg)
       raise RuntimeError, "FFMPEG not at configured location: #{ffmpeg}"
     end
     base = id.gsub(/\//,'_')
+    aspect = new_width/new_height
     Tempfile.open([base,'.jpg']) do |jpeg|
       file_source = frame_source[:source]
       unless file_source =~ %r(https?://)
@@ -619,12 +611,23 @@ class MasterFile < ActiveFedora::Base
         File.symlink(frame_source[:source],file_source)
       end
       begin
-        options = ffmpeg_frame_options(file_source, jpeg.path, frame_source[:offset], new_width, new_height, frame_source[:non_temp_file], headers)
+        options = [
+          '-i',       file_source,
+          '-ss',      (frame_source[:offset] / 1000.0).to_s,
+          '-s',       "#{new_width.to_i}x#{new_height.to_i}",
+          '-vframes', '1',
+          '-aspect',  aspect.to_s,
+          '-q:v',       '4',
+          '-y',       jpeg.path
+        ]
+        if frame_source[:master]
+          options[0..3] = options.values_at(2,3,0,1)
+        end
         Kernel.system(ffmpeg, *options)
         jpeg.rewind
         data = jpeg.read
         Rails.logger.debug("Generated #{data.length} bytes of data")
-        if (!frame_source[:non_temp_file]) and data.length == 0
+        if (!frame_source[:master]) and data.length == 0
           # -ss before -i is faster, but fails on some files.
           Rails.logger.warn("No data received. Swapping -ss and -i options")
           options[0..3] = options.values_at(2,3,0,1)
@@ -636,48 +639,20 @@ class MasterFile < ActiveFedora::Base
         data
       ensure
         File.unlink file_source unless file_source.match? %r{https?://}
-        File.unlink frame_source[:source] unless frame_source[:non_temp_file] or frame_source[:source].match? %r{https?://}
+        File.unlink frame_source[:source] unless frame_source[:master] or frame_source[:source].match? %r{https?://}
         File.unlink jpeg
       end
     end
   end
 
-  def ffmpeg_frame_options(file_source, output_path, offset, new_width, new_height, master, headers)
-    options = [
-      '-i',       file_source,
-      '-ss',      (offset / 1000.0).to_s,
-      '-s',       "#{new_width.to_i}x#{new_height.to_i}",
-      '-vframes', '1',
-      '-aspect',  (new_width / new_height).to_s,
-      '-q:v',     '4',
-      '-y',       output_path
-    ]
-    if master
-      options[0..3] = options.values_at(2,3,0,1)
-    end
-    if headers.present?
-      options = ["-headers", headers.map { |k, v| "#{k}: #{v}\r\n" }.join] + options
-    end
-
-    options
-  end
-
-  def saveOriginal(file, original_name = nil, dropbox_dir = media_object.collection.dropbox_absolute_path)
+  def saveOriginal(file, original_name=nil)
     realpath = File.realpath(file.path)
 
     if original_name.present?
       # If we have a temp name from an upload, rename to the original name supplied by the user
       unless File.basename(realpath) == original_name
-        parent_dir = File.dirname(realpath)
-        # Move files which aren't under the collection's dropbox into the root of the dropbox
-        parent_dir = dropbox_dir unless dropbox_dir.nil? || parent_dir.start_with?(dropbox_dir)
-        path = File.join(parent_dir, original_name)
-        num = 1
-        while File.exist? path
-          path = File.join(parent_dir, duplicate_file_name(original_name, num))
-          num += 1
-        end
-        FileUtils.move(realpath, path)
+        path = File.join(File.dirname(realpath), original_name)
+        File.rename(realpath, path)
         realpath = path
       end
 
@@ -687,11 +662,6 @@ class MasterFile < ActiveFedora::Base
     self.file_size = file.size.to_s
   ensure
     file.close
-  end
-
-  def duplicate_file_name(filename, num)
-    extension = File.extname(filename)
-    File.basename(filename).sub(extension, "-#{num}#{extension}")
   end
 
   def saveDerivativesHash(derivative_hash)
@@ -710,32 +680,32 @@ class MasterFile < ActiveFedora::Base
 
   def reloadTechnicalMetadata!
     #Reset mediainfo
-    @mediainfo = mediainfo
+    @mediainfo = nil
 
     # Formats like MP4 can be caught as both audio and video
     # so the case statement flows in the preferred order
-    self.file_format = if @mediainfo.video?
+    self.file_format = if mediainfo.video?
                          'Moving image'
-                       elsif @mediainfo.audio?
+                       elsif mediainfo.audio?
                          'Sound'
                        else
                          'Unknown'
                        end
 
     self.duration = begin
-      @mediainfo.duration.to_s
+      mediainfo.duration.to_s
     rescue
       nil
     end
 
-    unless @mediainfo.video.streams.empty?
-      display_aspect_ratio_s = @mediainfo.video.streams.first.display_aspect_ratio
+    unless mediainfo.video.streams.empty?
+      display_aspect_ratio_s = mediainfo.video.streams.first.display_aspect_ratio
       if ':'.in? display_aspect_ratio_s
         self.display_aspect_ratio = display_aspect_ratio_s.split(/:/).collect(&:to_f).reduce(:/).to_s
       else
         self.display_aspect_ratio = display_aspect_ratio_s
       end
-      self.original_frame_size = @mediainfo.video.streams.first.frame_size
+      self.original_frame_size = mediainfo.video.streams.first.frame_size
       self.poster_offset = [2000,self.duration.to_i].min
     end
   end
