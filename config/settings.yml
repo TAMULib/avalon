@@ -16,7 +16,7 @@ encoding:
 mediainfo:
   path: '/usr/bin/mediainfo --urlencode' # Fixes mediainfo v20.03 bug with S3 presigned URL
 ffmpeg:
-  path: '/usr/local/bin/ffmpeg'
+  path: '/usr/bin/ffmpeg'
 email:
   mailer: :smtp
   config:  
@@ -52,7 +52,6 @@ streaming:
   stream_token_ttl: 20 #minutes
   content_path: '<%= ENV['env_streaming_content_path'] %>'
   rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
-  http_base: 'http://localhost:3000/streams'
   default_quality: 'auto'
 redis:
   host: '<%= ENV['env_redis_host'] %>'
@@ -63,9 +62,6 @@ master_file_management:
   path: '/mnt/avalon/avalon-archive'  
 groups:
   system_groups: [administrator, group_manager, manager]
-master_file_management:
-  strategy: 'none' #'delete', or 'move' (for move uncomment and configure next line)
-  #path: '/path/to/move/to'
 bib_retriever:
   default:
     protocol: sru
