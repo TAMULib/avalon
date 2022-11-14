@@ -1,11 +1,11 @@
 # Copyright 2011-2022, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-#
+# 
 # You may obtain a copy of the License at
-#
+# 
 # http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -559,6 +559,12 @@ describe MasterFile do
       path = '/path/to/avalon_12345-video.mp4'
       expect(MasterFile.post_processing_move_filename(path, id: id).include?(id_prefix + '-' + id_prefix)).to be_falsey
     end
+    context 'path contains spaces' do
+      path = '/path/to/video file.mp4'
+      it 'removes spaces' do
+        expect(MasterFile.post_processing_move_filename(path, id: id)).not_to include(' ')
+      end
+    end
   end
 
   context 'with a working directory' do
@@ -606,6 +612,35 @@ describe MasterFile do
     end
     it "raises an exception when ffmpeg doesn't extract anything" do
       expect {video_master_file.send(:extract_frame, {size: '160x120', offset: 1})}.to raise_error
+    end
+  end
+
+  describe 'find_frame_source' do
+    context 'when master_file has been deleted' do
+      subject(:video_master_file) { FactoryBot.create(:master_file, :with_media_object, :with_derivative, display_aspect_ratio: '1', file_location: '') }
+      let(:source) { video_master_file.send(:find_frame_source) }
+
+      context 'when derivatives are accessible' do
+        let(:high_derivative_locator) { FileLocator.new(video_master_file.derivatives.where(quality_ssi: 'high').first.absolute_location) }
+
+        it 'uses high derivative' do
+          expect(File).to receive(:exists?).with(high_derivative_locator.location).and_return(true)
+          expect(source[:source]).to eq high_derivative_locator.location
+          expect(source[:non_temp_file]).to eq true
+        end
+      end
+
+      context 'when derivatives are not accessible' do
+        let(:high_derivative_locator) { FileLocator.new(video_master_file.derivatives.where(quality_ssi: 'high').first.absolute_location) }
+        let(:hls_temp_file) { "/tmp/temp_segment.ts" }
+
+        it 'falls back to HLS' do
+          expect(video_master_file).to receive(:create_frame_source_hls_temp_file).and_return(hls_temp_file)
+          expect(File).to receive(:exists?).with(high_derivative_locator.location).and_return(false)
+          expect(source[:source]).to eq '/tmp/temp_segment.ts'
+          expect(source[:non_temp_file]).to eq false
+        end
+      end
     end
   end
 
@@ -775,7 +810,7 @@ describe MasterFile do
 
     context 'without derivative' do
       let(:master_file) { FactoryBot.build(:master_file) }
-    
+
       it 'returns false' do
         expect(master_file.has_audio?).to eq false
       end
@@ -786,7 +821,7 @@ describe MasterFile do
 
       context 'with audio track' do
         let(:derivative) { FactoryBot.build(:derivative, audio_codec: 'aac') }
-        
+
         it 'returns true' do
           expect(master_file.has_audio?).to eq true
         end
@@ -794,7 +829,7 @@ describe MasterFile do
 
       context 'without audio track' do
         let(:derivative) { FactoryBot.build(:derivative, audio_codec: nil) }
-        
+
         it 'returns false' do
           expect(master_file.has_audio?).to eq false
         end
