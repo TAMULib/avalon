@@ -21,6 +21,9 @@ if server_options
 
   # Required for rails 6+
   # See https://blog.saeloun.com/2019/10/31/rails-6-adds-guard-against-dns-rebinding-attacks.html
-  Rails.application.config.hosts << server_options[:host]
-  Rails.application.config.hosts << ENV['RAILS_ADDITIONAL_HOSTS'] if ENV['RAILS_ADDITIONAL_HOSTS'].present?
-end
+  #Rails.application.config.hosts << server_options[:host]
+  #Rails.application.config.hosts << ENV['RAILS_ADDITIONAL_HOSTS'] if ENV['RAILS_ADDITIONAL_HOSTS'].present?
+
+  #disable for TAMU / Docker for now.  11/19/2023
+  Rails.application.config.hosts = nil
+  end
