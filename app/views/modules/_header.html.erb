@@ -21,17 +21,6 @@ Unless required by applicable law or agreed to in writing, software distributed
         <%= image_tag "Home.png", class: "img-fluid", alt: "Avalon Media System - #{t(:release_label)} #{Avalon::VERSION}" %>
         <% end %>
       </div>
-
-      <% unless current_page?(main_app.root_path) %>
-      <div class="header-search">
-        <%= render :partial=>'modules/avalon_search_form' %>
-      </div>
-      <% end %>
-
-      <%# By default shift log in / log out to the header %>
-      <div class="text-right log-in-out text-muted header-user">
-        <%= render 'modules/user_management' %>
-      </div>
     </header>
   </div>
 </div>
