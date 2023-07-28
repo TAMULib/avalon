@@ -38,6 +38,11 @@ Unless required by applicable law or agreed to in writing, software distributed
 </head>
 
 <body data-mountpoint="<%=main_app.root_path%>">
+
+<% if Settings.google_analytics_tracking_id.present? %>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%= Settings.google_analytics_tracking_id %>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<% end %>
+
   <div class="page-container">
     <div class="content-wrapper">
       <a id="skip-to-content" class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
