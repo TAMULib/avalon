@@ -1,0 +1,3 @@
+# attribute-map.yml
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "user_name"
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "email"

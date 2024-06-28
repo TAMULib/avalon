@@ -61,6 +61,8 @@ gem 'omniauth-identity'
 gem 'omniauth-lti', git: "https://github.com/avalonmediasystem/omniauth-lti.git", tag: 'avalon-r4'
 gem 'omniauth-ldap'				   
 
+gem 'devise_saml_authenticatable'
+
 # Media Access & Transcoding
 gem 'active_encode', '~> 0.7.0'
 gem 'audio_waveform-ruby', '~> 1.0.7', require: 'audio_waveform'

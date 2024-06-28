@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable
   # Registration is controlled via settings.yml
-  devise_list = [ :database_authenticatable, :invitable, :omniauthable,
+  devise_list = [ :saml_authenticatable, :invitable, :omniauthable,
                   :recoverable, :rememberable, :trackable, :validatable ]
   devise_list << :registerable if Settings.auth.registerable
   devise_list << { authentication_keys: [:login] }

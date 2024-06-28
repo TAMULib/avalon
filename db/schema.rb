@@ -238,6 +238,7 @@ ActiveRecord::Schema.define(version: 2020_04_14_154529) do
   create_table "users", force: :cascade do |t|
     t.string "username", null: false
     t.string "email", null: false
+    t.string "session_index"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "provider"
