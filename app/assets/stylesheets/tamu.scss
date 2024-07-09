@@ -5,21 +5,21 @@
 }
 
 #header-navbar .navbar-toggle, #header-navbar .facets-toggle {
-  background: #ffcf08;
+  background: $yellow;
 }
 
 .container > .navbar-header, .container > .navbar-collapse, .container > #facet-panel-collapse, .container > div[id*='facet-panel-'], .container-fluid > .navbar-header, .container-fluid > .navbar-collapse, .container-fluid > #facet-panel-collapse, .container-fluid > div[id*='facet-panel-'] {
-  background-color: #500000;
+  background-color: $primary;
 }
 
 .custom-header {
   background-color: #3c0000;
   padding: 10px 0px 10px 0px;
-  border-bottom: 2px solid #8d8d8d;
+  border-bottom: 2px solid $gray;
 }
 
 .navbar-default {
-  background: #500000;
+  background: $primary;
 }
 
 .navbar-right {
@@ -28,7 +28,7 @@
 
 .navbar-title {
   background: #3c0000;
-  color: white;
+  color: $white;
 }
 
 .header-wrapper .header-logo > a:hover {
@@ -41,17 +41,17 @@
 }
 
 .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-  color: #500000;
-  background-color: #ffcf08;
+  color: $primary;
+  background-color: $yellow;
 }
 	
 .navbar-default .navbar-nav > li > a {
-  color: white;
+  color: $white;
 }	
 
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-  color: #500000;
-  background-color: #ffcf08;
+  color: $primary;
+  background-color: $yellow;
 }
 
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
@@ -59,13 +59,13 @@
 }
 
 .btn-primary {
-  color: white;
-  background-color: #500000;
-  border-color: #500000;
+  color: $white;
+  background-color: $primary;
+  border-color: $primary;
 }
 
 .btn-primary:hover {
-  color: white;
+  color: $white;
   background-color: #3c0000;
   border-color: #3c0000;
 }
