@@ -33,7 +33,7 @@ $state-info-border:              darken(adjust-hue($state-info-bg, -10), 7%) !de
   .navbar-brand {
     @extend .desktop-hidden;
     background-size: contain;
-    background-color: white;
+    background-color: $primary;
     background-position: 20%;
     margin-top: 0;
   }
