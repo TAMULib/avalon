@@ -46,14 +46,14 @@
 	
 .navbar-default .navbar-nav > li > a {
   color: $white;
+  display: block;
+  padding: 15px 10px 15px 10px;
 }	
 
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
   color: $primary;
   background-color: $yellow;
-  padding: 15px 10px 15px 10px;
   text-decoration: none;
-  display: block;
 }
 
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
