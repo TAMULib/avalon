@@ -102,6 +102,20 @@ auth:
         :password: <%= ENV['env_ldap_password'] %>
         :base: OU=UserAccounts,DC=library,DC=tamu,DC=edu
     <% end %>
+    <% if ENV['env_saml_assertion_consumer_service_url'] %>
+    - :name: TAMU SAML
+      :provider: :saml
+      :params:
+        :assertion_consumer_service_url: <%= ENV['env_saml_assertion_consumer_service_url'] %>
+        :issuer: <%= ENV['env_saml_issuer'] %>
+        :sp_entity_id: <%= ENV['env_saml_sp_entity_id'] %>
+        :idp_sso_service_url: <%= ENV['env_saml_idp_sso_service_url'] %>
+        :idp_slo_service_url: <%= ENV['env_saml_idp_slo_service_url'] %>
+        :idp_cert_fingerprint: <%= ENV['env_saml_idp_cert_fingerprint'] %>
+        :name_identifier_format: <%= ENV['env_saml_name_identifier_format'] %>
+        :attribute_statements:
+          :email: ['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
+    <% end %>
 google_analytics_tracking_id: "GTM-P7RSFMJ"
 
 supplemental_files:
