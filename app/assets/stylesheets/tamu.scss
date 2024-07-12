@@ -1,8 +1,13 @@
+#header-navbar {
+  @media screen and (min-width: 768px) {
+    border-top: 1px solid gray;
+  }
+}
+
 #header-navbar .navbar-brand {
   background: transparent "tamu-logo-with-bar.png" no-repeat top left;
   margin-top: 10px;
   margin-bottom: -10px;
-  border-top: 2px solid $gray;
 }
 
 #header-navbar .navbar-toggle, #header-navbar .facets-toggle {
@@ -11,6 +16,11 @@
 
 .container > .navbar-header, .container > .navbar-collapse, .container > #facet-panel-collapse, .container > div[id*='facet-panel-'], .container-fluid > .navbar-header, .container-fluid > .navbar-collapse, .container-fluid > #facet-panel-collapse, .container-fluid > div[id*='facet-panel-'] {
   background-color: $primary;
+}
+
+.header-logo .desktop-hidden {
+  color: white;
+  margin-left: 10px;
 }
 
 .custom-header {
