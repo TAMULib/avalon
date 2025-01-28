@@ -37,7 +37,7 @@ gem 'rdf-vocab', '< 3.1.5'
 gem 'blacklight', '~> 7.25'
 gem 'blacklight-access_controls', '>= 6.0.1' # ensure rails 6 support
 gem 'rdf', '~> 3.1'
-gem 'rsolr', '~> 1.0'
+gem 'rsolr', '~> 2.0'
 
 # Rails & Samvera Plugins
 gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6.5'
@@ -54,7 +54,7 @@ gem 'rack-cors', require: 'rack/cors'
 gem 'rails_same_site_cookie'
 gem 'recaptcha', require: 'recaptcha/rails'
 gem 'samvera-persona', '~> 0.3'
-gem 'speedy-af', '~> 0.2'
+gem 'speedy-af', '~> 0.3'
 
 # Avalon Components
 gem 'avalon-workflow', git: "https://github.com/avalonmediasystem/avalon-workflow.git", tag: 'avalon-r6.5'
@@ -64,14 +64,14 @@ gem 'devise', '~> 4.8'
 gem 'devise_invitable', '~> 2.0'
 gem 'ims-lti', '~> 1.1.13'
 gem 'net-ldap'
-gem 'omniauth', '~> 1.9.2'
+gem 'omniauth', '~> 2.0'
 gem 'omniauth-identity', '>= 2.0.0'
 gem 'omniauth-lti', git: "https://github.com/avalonmediasystem/omniauth-lti.git", tag: 'avalon-r4'
-gem "omniauth-saml", "~> 1.10.3"
+gem "omniauth-saml", "~> 2.0"
 gem 'omniauth-ldap', "~> 1.0.5"
 
 # Media Access & Transcoding
-gem 'active_encode', '~> 0.8.2'
+gem 'active_encode', '~> 1.0'
 gem 'audio_waveform-ruby', '~> 1.0.7', require: 'audio_waveform'
 gem 'browse-everything', git: "https://github.com/avalonmediasystem/browse-everything.git", branch: 'v1.2-avalon'
 gem 'fastimage'

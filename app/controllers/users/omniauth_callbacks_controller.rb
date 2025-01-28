@@ -1,11 +1,11 @@
 # Copyright 2011-2022, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -23,22 +23,6 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     rescue ActionView::MissingTemplate
       redirect_to new_user_session_path, flash: { alert: I18n.t('devise.failure.invalid') }
     end
-  end
-
-  def saml
-    @user = User.find_for_saml(request.env["omniauth.auth"], current_user)
-    if @user.persisted?
-      flash[:success] = I18n.t "devise.omniauth_callbacks.success", :kind => :saml
-      sign_in @user, :event => :authentication
-      user_session[:virtual_groups] = @user.ldap_groups
-      user_session[:full_login] = true
-    end
-    relay_state = request.env["action_dispatch.request.parameters"]["RelayState"]
-    if relay_state.nil?
-      redirect_to(root_path)
-    else
-      redirect_to(relay_state)
-    end 
   end
 
   def after_omniauth_failure_path_for(scope)
@@ -102,5 +86,10 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     support_email = Settings.email.support
     notice_text = I18n.t('errors.deleted_auth_error') % [support_email, support_email]
     redirect_to root_path, flash: { error: notice_text.html_safe }
+  end
+
+  rescue_from OAuth::Signature::UnknownSignatureMethod do |exception|
+    notice_text = I18n.t('errors.general_auth_error')
+    redirect_to root_path, flash: { error: notice_text }
   end
 end

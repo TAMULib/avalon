@@ -6,6 +6,7 @@ domain:
 dropbox:
   path: <%= ENV['env_dropbox_path'] %>
   upload_uri: <%= ENV['env_dropbox_upload_uri'] %>  # google_drive:
+  # google_drive:
   #   client_id: id
   #   client_secret: secret
   #   redis_token_store_url: redis://host:port # if different from Avalon's Redis
@@ -57,11 +58,11 @@ redis:
   host: '<%= ENV['env_redis_host'] %>'
   port: '<%= ENV['env_redis_port'] %>'
   db: 0
+groups:
+  system_groups: [administrator, group_manager, manager]
 master_file_management:
   strategy: 'delete' #'delete', or 'move' (for move uncomment and configure next line)
   path: '/mnt/avalon/avalon-archive'  
-groups:
-  system_groups: [administrator, group_manager, manager]
 bib_retriever:
   default:
     protocol: sru
@@ -117,7 +118,6 @@ auth:
           :email: ['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
     <% end %>
 google_analytics_tracking_id: "GTM-P7RSFMJ"
-
 supplemental_files:
   proxy: false
 waveform:
@@ -127,4 +127,8 @@ waveform:
 active_storage:
   service: local
   #bucket: supplementalfiles
-
+controlled_digital_lending:
+  enable: false
+  # Choose whether every collection has CDL enabled or disabled by default
+  collections_enabled: false
+  default_lending_period: 'P14D' # ISO8601 duration format: P14D == 14.days, PT8H == 8.hours, etc.

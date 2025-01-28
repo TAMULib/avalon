@@ -1,11 +1,11 @@
 # Copyright 2011-2022, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -13,6 +13,7 @@
 # ---  END LICENSE_HEADER BLOCK  ---
 
 class User < ActiveRecord::Base
+  has_many :checkouts, dependent: :destroy
   attr_writer :login
   # Connects this user object to Hydra behaviors.
   include Hydra::User
@@ -29,8 +30,7 @@ class User < ActiveRecord::Base
   devise_list = [ :database_authenticatable, :invitable, :omniauthable,
                   :recoverable, :rememberable, :trackable, :validatable ]
   devise_list << :registerable if Settings.auth.registerable
-
-  devise_list << { authentication_keys: [:login], omniauth_providers: [:saml] }
+  devise_list << { authentication_keys: [:login] }
 
   devise(*devise_list)
 
@@ -110,12 +110,6 @@ class User < ActiveRecord::Base
     find_or_create_by_username_or_email(username, email, 'generic')
   end
 
-  def self.find_for_saml(auth_hash, signed_in_resource=nil)
-    email = auth_hash.info.email
-    username = email
-    find_or_create_by_username_or_email(username, email, 'saml')
-  end
-
   def self.find_for_identity(access_token, signed_in_resource=nil)
     username = access_token.info['email']
     # Use email for both username and email for the created user
@@ -153,7 +147,7 @@ class User < ActiveRecord::Base
 
   def self.ldap_member_of(cn)
     return [] unless defined? Avalon::GROUP_LDAP
-    entry = Avalon::GROUP_LDAP.search(:base => Avalon::GROUP_LDAP_TREE, :filter => Net::LDAP::Filter.eq("cn", cn), :attributes => ["memberof"]).first
+    entry = Avalon::GROUP_LDAP.search(:base => Avalon::GROUP_LDAP_TREE, :filter => Net::LDAP::Filter.eq("cn", cn), :attributes => ["memberof"])&.first
     entry.nil? ? [] : entry["memberof"].collect {|mo| mo.split(',').first.split('=').second}
   end
 
