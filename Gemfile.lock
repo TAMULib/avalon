@@ -1037,7 +1037,6 @@ DEPENDENCIES
   omniauth-identity (>= 2.0.0)
   omniauth-lti!
   omniauth-saml (~> 2.0)
-  omniauth-ldap (~> 1.0.5)
   parallel
   pg
   pry-byebug
