@@ -16,11 +16,20 @@ Unless required by applicable law or agreed to in writing, software distributed
 <div id="main_content_container" class="container-fluid">
   <div class="content" class="col-md-8">
     <h2>Restricted Content</h2>
+	<p>This content is restricted to users associated with Texas A&M University.  You can try and access this content via the Library proxy server url below.</p>
+	<p>
+	<a href="#" id="proxylink">https://proxy.library.tamu.edu/login?url=<script>document.write(window.location.href);</script></a>
+	</p>
     <% if current_user.nil? %>
-      <p>You're not signed in. You may be able to view this item after signing in.</p>
+      <p>If you are a Library staff member. You may be able to view this item after signing in.</p>
       <%= link_to 'Sign in', main_app.new_user_session_path, class: "btn btn-info" %>
     <% else %>
       <p>You are not authorized to access this content.</p>
     <% end %>
   </div>
 </div>
+
+<script type="text/javascript">
+	var newlink = "https://proxy.library.tamu.edu/login?url=" + window.location.href;
+	document.getElementById("proxylink").href = newlink;
+</script>
