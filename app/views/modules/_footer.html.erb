@@ -27,9 +27,14 @@ Unless required by applicable law or agreed to in writing, software distributed
 		<li><a href="https://library.tamu.edu/status/">Services Status</a></li>
 		<li><%= render 'modules/user_management' %></li>
     </ul>
-    <div class="release">
-      <%=release_text%>
-      <%= git_commit_info(" (%s %s [%s])") if Rails.env == 'development' %>
+
+<!--
+	<div class="release">
+		<%=release_text%>
+		<%= git_commit_info(" (%s %s [%s])") if Rails.env == 'development' %> -->
     </div>
+-->
+	
   </footer>
+  
 </div>
