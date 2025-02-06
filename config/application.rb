@@ -34,8 +34,13 @@ module Avalon
 
     config.active_job.queue_adapter = :sidekiq
 
-    config.action_dispatch.default_headers = { 'X-Frame-Options' => 'ALLOWALL' }
-
+    config.action_dispatch.default_headers = { 
+		'X-Frame-Options' => 'ALLOWALL' ,
+		'Access-Control-Allow-Origin' => '*',			
+		'Access-Control-Request-Method' => 'GET, PATCH, PUT, POST, OPTIONS, DELETE',
+		'Access-Control-Allow-Headers' => '*'
+	}
+	
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins { |source| true }
