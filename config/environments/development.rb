@@ -3,6 +3,7 @@ Rails.application.configure do
 
   config.hosts << ENV['env_kaltura_hostname']
   config.hosts << ENV['env_avalon_hostname']
+  config.hosts << ENV['env_additional_hostname']
   
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development

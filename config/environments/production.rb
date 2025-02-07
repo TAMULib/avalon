@@ -3,6 +3,7 @@ Rails.application.configure do
 
   config.hosts << ENV['env_kaltura_hostname']
   config.hosts << ENV['env_avalon_hostname']
+  config.hosts << ENV['env_additional_hostname']
   
   # Verifies that versions and hashed value of the package contents in the project's package.json
   config.webpacker.check_yarn_integrity = false
