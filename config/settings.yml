@@ -53,6 +53,7 @@ streaming:
   stream_token_ttl: 20 #minutes
   content_path: '<%= ENV['env_streaming_content_path'] %>'
   rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
+  http_base: 'http://localhost:3000/streams'
   default_quality: 'auto'
 redis:
   host: '<%= ENV['env_redis_host'] %>'
@@ -132,3 +133,7 @@ controlled_digital_lending:
   # Choose whether every collection has CDL enabled or disabled by default
   collections_enabled: false
   default_lending_period: 'P14D' # ISO8601 duration format: P14D == 14.days, PT8H == 8.hours, etc.
+caption_default:
+  # Language should be 2 or 3 letter ISO 639 codes
+  language: 'en'
+  name: 'English'
