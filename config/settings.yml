@@ -49,11 +49,10 @@ zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
   server: :nginx
-  http_base: '<%= ENV['env_streaming_http_base'] %>'
   stream_token_ttl: 20 #minutes
   content_path: '<%= ENV['env_streaming_content_path'] %>'
   rtmp_base: '<%= ENV['env_streaming_rtmp_base'] %>'
-  http_base: 'http://localhost:3000/streams'
+  http_base: '<%= ENV['env_streaming_http_base'] %>'
   default_quality: 'auto'
 redis:
   host: '<%= ENV['env_redis_host'] %>'
