@@ -79,7 +79,8 @@ RUN         apt-get update && \
          && apt-get -y install mediainfo \
          && ln -s /usr/bin/lsof /usr/sbin/
 
-RUN         useradd -m -U app \
+# RUN       useradd -m -U app 
+RUN         useradd -m -U -u 9999 app \
          && su -s /bin/bash -c "mkdir -p /home/app/avalon" app
 WORKDIR     /home/app/avalon
 
@@ -135,7 +136,6 @@ ENV         RAILS_ENV=production
 RUN         SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') bundle exec rake webpacker:compile
 RUN         SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') bundle exec rake assets:precompile
 RUN         cp config/controlled_vocabulary.yml.example config/controlled_vocabulary.yml
-
 
 # Build production image
 FROM        base as prod
