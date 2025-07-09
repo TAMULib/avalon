@@ -23,7 +23,7 @@ Unless required by applicable law or agreed to in writing, software distributed
 		<li><a href="https://www.tamu.edu">Texas A&amp;M University</a></li>
 		<li><a href="https://library.tamu.edu/about/compliance.html">Site Policies</a></li>
 		<li><a href="https://askus.library.tamu.edu/contact/index">Comments</a></li>
-		<li><%= request.env['HTTP_X_REAL_IP'] %></li>
+		<li><%= request.env['HTTP_CF_CONNECTING_IP'] %></li>
 		<li><a href="https://library.tamu.edu/status/">Services Status</a></li>
 		<li><%= render 'modules/user_management' %></li>
     </ul>
