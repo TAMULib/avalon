@@ -155,7 +155,11 @@ class ApplicationController < ActionController::Base
   def current_ability
     session_opts ||= user_session
     session_opts ||= {}
-    @current_ability ||= Ability.new(current_user, session_opts.merge(remote_ip: request.remote_ip))
+#    @current_ability ||= Ability.new(current_user, session_opts.merge(remote_ip: request.remote_ip))
+# TAMU Load Balancers use the Real IP or whatnot...  DCH 11-2022
+tamu_client_ip = request.env['HTTP_CF_CONNECTING_IP'] || request.env['REMOTE_ADDR'] || 'Unknown IP' 
+
+	@current_ability ||= Ability.new(current_user, session_opts.merge(remote_ip: tamu_client_ip))
   end
 
   rescue_from CanCan::AccessDenied do |exception|

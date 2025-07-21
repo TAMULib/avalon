@@ -1,213 +1,150 @@
-version: '3.4'
-
 volumes:
-  database:
-  fedora:
-  solr:
-  npms:
-  data:
-
-networks:
-  internal:
-  external:
-
+  solr:  
 services:
-  db: &db-avalon
-    image: postgres:14-alpine
+  db:
+    container_name: ${POSTGRES_CONTAINER_NAME} 
+    image: avalonmediasystem/db:fedora4
+    build: ./db
     volumes:
-      - database:/data
+      - ./data/database:/data   
+      - ./data:/mnt/data   
+      - D:/Data/avalon_code:/home/app/avalon
     environment:
+      - AVALON_DB_PASSWORD=${AVALON_DB_PASSWORD}
+      - AVALON_DB_USER=${AVALON_DB_USER}      
+      - FEDORA_DB_PASSWORD=${FEDORA_DB_PASSWORD}
+      - FEDORA_DB_USER=${FEDORA_DB_USER}      
       - PGDATA=/data
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=avalon
-      - POSTGRES_PASSWORD=password
-    networks:
-      internal:
-  db-test:
-    <<: *db-avalon
-    volumes: []
-
-  fedora: &fedora
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+       - "5433:5432"  
+  fedora:
+    container_name: ${FEDORA_CONTAINER_NAME} 
     image: avalonmediasystem/fedora:4.7.5
+    build:
+      context: ./fedora
+      args:
+        - FEDORA_VERSION=4.7.5
+    environment:
+      - FEDORA_DB_PASSWORD=${FEDORA_DB_PASSWORD}
+      - JAVA_OPTIONS=-Dfcrepo.postgresql.password=${FEDORA_DB_PASSWORD} -Dfcrepo.postgresql.username=fedora -Dfcrepo.postgresql.host=db -Dfcrepo.modeshape.configuration=classpath:/config/jdbc-postgresql/repository.json -Dfcrepo.home=/data
     depends_on:
       - db
     volumes:
-      - fedora:/data
-    environment:
-      - JAVA_OPTIONS=-Dfcrepo.modeshape.configuration=classpath:/config/file-simple/repository.json -Dfcrepo.home=/data
-    networks:
-      internal:
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-  fedora-test:
-    <<: *fedora
-    volumes: []
-
-  solr: &solr
+      - ./data/fedora:/data
+    ports:
+       - "8080:8080"  
+  solr:
+    container_name: ${SOLR_CONTAINER_NAME}    
     image: solr:9
     volumes:
       - ./solr/conf:/opt/solr/avalon_conf
-      - solr:/var/solr
+      - ./data/solr_data:/var/solr    
     command:
       - solr-precreate
       - avalon
       - /opt/solr/avalon_conf
-    networks:
-      internal:
-  solr-test:
-    <<: *solr
-    volumes:
-      - ./solr/conf:/opt/solr/avalon_conf
-
-  hls:
-    image: avalonmediasystem/nginx:minio-jammy
     environment:
-      - AVALON_DOMAIN=http://avalon:3000
-      - AVALON_STREAMING_BUCKET_URL=http://minio:9000/derivatives/
-    volumes:
-      - ./log/nginx:/var/log/nginx
+      - SOLR_MODULES=analysis-extras,extraction      
     ports:
-      - '8880:80'
-    networks:
-      internal:
-      external:
-
-  redis: &redis
+       - "8983:8983"  
+  hls:
+    container_name: ${NGINX_CONTAINER_NAME}   
+    hostname: localhost:8880
+    image: ${VIC_SERVER}/avalon/nginx:${RANCHER_IMAGE_VERSION}
+    build:
+      context: ./nginx
+    volumes:
+      - ./data/masterfiles:/mnt/avalon/masterfiles  
+    environment:
+      - env_kaltura_streaming_port=${KALTURA_STREAMING_PORT}
+      - env_rtmp_avalon_url=${RTMP_AVALON_URL}
+      - env_master_file_location=${MASTER_FILE_LOCATION}
+      - env_proxy_pass_url=${PROXY_PASS_URL}
+      - env_resolver_ip=${RESOLVER_IP} 
+      - env_auth_request_line=${AUTH_REQUEST_LINE}      
+    ports:
+       - "8880:8880"
+  redis:
+    container_name: ${REDIS_CONTAINER_NAME} 
     image: redis:alpine
-    networks:
-      internal:
-  redis-test:
-    <<: *redis
-
   avalon: &avalon
-    image: avalonmediasystem/avalon:develop
+    container_name: ${AVALON_CONTAINER_NAME} 
+    image: ${VIC_SERVER}/avalon/${AVALON_CONTAINER_NAME}:${RANCHER_IMAGE_VERSION}
     build:
       context: .
-      target: dev
-    command: bash -c "/docker_init.sh && bundle exec rails server -b 0.0.0.0"
+    command: bash -c "/home/app/avalon/docker_init.sh && bundle exec rails server -b 0.0.0.0"
     depends_on:
       - db
       - fedora
       - solr
       - redis
       - hls
-      - minio
     environment:
+      - INITIAL_USER=dhahn@tamu.edu
       - APP_NAME=avalon
       - BUNDLE_FLAGS=--with development postgres --without production test
-      - ENCODE_WORK_DIR=/tmp
+      - ENCODE_WORK_DIR=/mnt/avalon/masterfiles
       - CONTROLLED_VOCABULARY=config/controlled_vocabulary.yml
-      - DATABASE_URL=postgres://postgres:password@db/avalon
+      - DATABASE_URL=${DATABASE_URL}
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - FEDORA_NAMESPACE=avalon
-      - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
-      - RAILS_ENV=development
-      - RAILS_ADDITIONAL_HOSTS=avalon
+      - FEDORA_BASE_PATH=${FEDORA_BASE_PATH}
+      - FEDORA_NAMESPACE=${FEDORA_NAMESPACE}
+      - FEDORA_URL=${FEDORA_URL}
+      - RAILS_ENV=production
+      - RAILS_ADDITIONAL_HOSTS=${NGINX_CONTAINER_NAME}
+      - RAILS_SERVE_STATIC_FILES=true       
       - SETTINGS__REDIS__HOST=redis
       - SETTINGS__REDIS__PORT=6379
-      - SECRET_KEY_BASE=abcd
-      - SOLR_URL=http://solr:8983/solr/avalon
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - SOLR_HOST=${SOLR_HOST}
+      - SOLR_PORT=${SOLR_PORT}
+      - SOLR_URL=${SOLR_URL}
       - AWS_REGION=us-east-1
-      - SETTINGS__ACTIVE_STORAGE__BUCKET=supplementalfiles
-      - SETTINGS__ACTIVE_STORAGE__SERVICE=generic_s3
+      - MASTER_FILE_PATH
+      - MASTER_FILE_STRATEGY=delete
+      - MAXIMUM_UPLOAD_SIZE=4294967296
       - SETTINGS__FFMPEG__PATH=/usr/bin/ffmpeg
-      - SETTINGS__MINIO__ENDPOINT=http://minio:9000
-      - SETTINGS__MINIO__PUBLIC_HOST=http://localhost:9000
-      - SETTINGS__MINIO__ACCESS=minio
-      - SETTINGS__MINIO__SECRET=minio123
-      - SETTINGS__ENCODING__MASTERFILE_BUCKET=masterfiles
-      - SETTINGS__ENCODING__DERIVATIVE_BUCKET=derivatives
-      - SETTINGS__DROPBOX__PATH=s3://masterfiles/dropbox/
-      - SETTINGS__DROPBOX__UPLOAD_URI=s3://masterfiles/dropbox/
-      - SETTINGS__MASTER_FILE_MANAGEMENT__PATH=s3://preserves/
-      - SETTINGS__MASTER_FILE_MANAGEMENT__STRATEGY=move
-      - SETTINGS__STREAMING__CONTENT_PATH=/
-      - SETTINGS__STREAMING__STREAM_DEFAULT_QUALITY=medium
-      - SETTINGS__STREAMING__HTTP_BASE=http://localhost:8880/avalon
-      - SETTINGS__STREAMING__SERVER=nginx
-      - SETTINGS__STREAMING__STREAM_TOKEN_TTL=20
       - SYSTEM_GROUPS=administrator,group_manager,manager
+      - env_rails_hosts=${AVALON_HOSTNAME}
+      - env_redis_host=${REDIS_HOST}   
+      - env_redis_port=6379        
+      - env_avalon_hostname=${AVALON_HOSTNAME}
+      - env_avalon_port=3000
+      - env_avalon_protocol=http
+      - env_dropbox_path=/mnt/avalon/dropbox
+      - env_dropbox_upload_uri=\\cifs.library.tamu.edu/avalon/dropbox/
+      - env_encoding_working_file_path=/mnt/avalon/ingest  
+      - env_email_comments=${EMAIL_COMMENTS} 
+      - env_email_notification=${EMAIL_NOTIFICATION} 
+      - env_email_support=${EMAIL_SUPPORT} 
+      - env_timeliner_url=http://${AVALON_HOSTNAME}:80/timeliner      
+      - env_streaming_http_base=http://${KALTURA_HOSTNAME}:8880/avalon
+      - env_streaming_rtmp_base=rtmp://${KALTURA_HOSTNAME}:8880/avalon
+      - env_streaming_content_path=/mnt/avalon/masterfiles  
+      - env_initial_user=${INITIAL_USER}
+      - env_kaltura_hostname=${KALTURA_HOSTNAME}            
+      - env_ip_checker=${IP_CHECKER}       
     volumes:
-      - .:/home/app/avalon
-      - npms:/home/app/avalon/node_modules
+      - D:/Data/avalon_code:/home/app/avalon
+      - ./data/masterfiles:/mnt/avalon/masterfiles
+      - ./data/dropbox:/mnt/avalon/dropbox   
+      - ./data/ingest:/mnt/avalon/ingest         
+      - ./data/gems:/gems        
+      - ./data:/mnt/data
     ports:
       - '3000:3000'
-    networks:
-      internal:
-      external:
     stdin_open: true
     tty: true
-
-  test:
-    <<: *avalon
-    command: >
-      bash -c "/docker_init.sh && tail -f /dev/null"
-    depends_on:
-      - db-test
-      - fedora-test
-      - solr-test
-      - redis-test
-    environment:
-      - DATABASE_URL=postgresql://postgres:password@db-test/avalon
-      - SETTINGS__FFMPEG__PATH=/usr/bin/ffmpeg
-      - SETTINGS__REDIS__HOST=redis-test
-      - SETTINGS__REDIS__PORT=6379
-      - FEDORA_URL=http://fedora-test:8080/fedora/rest
-      - SOLR_URL=http://solr-test:8983/solr/avalon
-      - RAILS_ENV=test
-      - BUNDLE_FLAGS=--with aws test postgres --without production
-      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-    ports: []
-
   worker:
     <<: *avalon
+    container_name: ${AVALON_CONTAINER_NAME}-worker 
     command: dumb-init -- bash -c "bundle install && bundle exec sidekiq -C config/sidekiq.yml"
-    ports: []
-
-  minio:
-    image: minio/minio:RELEASE.2024-01-29T03-56-32Z
-    command: minio server /data --console-address ":9090"
-    environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+    ports: []    
     volumes:
-      - data:/data
-    ports:
-      - 9000:9000
-      - 9090:9090
-    networks:
-      internal:
-      external:
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 minio minio123;
-      /usr/bin/mc mb -p myminio/fcrepo myminio/masterfiles myminio/derivatives myminio/supplementalfiles myminio/preserves;
-      /usr/bin/mc anonymous set download myminio/derivatives;
-      /usr/bin/mc anonymous set download myminio/supplementalfiles;
-      exit 0;
-      "
-    networks:
-      internal:
-
-  cypress:
-    network_mode: host
-    image: cypress/included:3.8.2
-    depends_on:
-      - avalon
-    entrypoint: cypress run -C spec/cypress/cypress.json
-    working_dir: /e2e
-    volumes:
-      - ./:/e2e
-      - npms:/e2e/node_modules
+      - ./data/masterfiles:/mnt/avalon/masterfiles
+      - ./data/dropbox:/mnt/avalon/dropbox   
+      - ./data/ingest:/mnt/avalon/ingest         
+      - ./data/gems:/gems  
+      - D:/Data/avalon_code:/home/app/avalon  

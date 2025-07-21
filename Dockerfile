@@ -14,6 +14,7 @@ RUN        apt-get update && apt-get upgrade -y build-essential && apt-get autor
          && apt-get clean
 
 COPY        Gemfile ./Gemfile
+COPY        Gemfile.local ./Gemfile.local
 COPY        Gemfile.lock ./Gemfile.lock
 
 RUN         gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)" \
@@ -80,6 +81,7 @@ RUN         apt-get update && \
          && apt-get -y install mediainfo \
          && ln -s /usr/bin/lsof /usr/sbin/
 
+#user 1000:1000
 RUN         useradd -m -U app \
          && su -s /bin/bash -c "mkdir -p /home/app/avalon" app
 WORKDIR     /home/app/avalon
