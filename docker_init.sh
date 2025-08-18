@@ -3,8 +3,7 @@
 yarn install
 bundle install
 
-#bundle install && \
-#SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') bundle exec rake assets:precompile
+SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') bundle exec rake assets:precompile
 
 cp config/controlled_vocabulary.yml.tamu config/controlled_vocabulary.yml
 

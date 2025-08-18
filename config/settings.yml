@@ -118,6 +118,7 @@ auth:
           :email: ['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
     <% end %>
 google_analytics_tracking_id: "GTM-P7RSFMJ"
+initial_user: <%= ENV['env_initial_user'] %>
 supplemental_files:
   proxy: false
 waveform:

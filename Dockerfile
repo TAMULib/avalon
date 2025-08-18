@@ -82,10 +82,14 @@ RUN         apt-get update && \
          && ln -s /usr/bin/lsof /usr/sbin/
 
 #user 1000:1000
-RUN         useradd -m -U app \
-         && su -s /bin/bash -c "mkdir -p /home/app/avalon" app
-WORKDIR     /home/app/avalon
+RUN groupadd -g 9999 app
+RUN useradd -u 9999 -g 9999 app
 
+RUN mkdir -p /home/app/avalon
+RUN chown app:app /home/app
+RUN chown app:app /home/app/avalon
+
+WORKDIR     /home/app/avalon
 
 # Build devevelopment image
 FROM        base as dev
@@ -137,7 +141,6 @@ ENV         RAILS_ENV=production
 
 RUN         SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') bundle exec rake assets:precompile
 RUN         cp config/controlled_vocabulary.yml.example config/controlled_vocabulary.yml
-
 
 # Build production image
 FROM        base as prod

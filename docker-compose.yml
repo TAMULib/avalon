@@ -82,7 +82,6 @@ services:
       - redis
       - hls
     environment:
-      - INITIAL_USER=dhahn@tamu.edu
       - APP_NAME=avalon
       - BUNDLE_FLAGS=--with development postgres --without production test
       - ENCODE_WORK_DIR=/mnt/avalon/masterfiles
@@ -90,8 +89,9 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - FEDORA_BASE_PATH=${FEDORA_BASE_PATH}
-      - FEDORA_NAMESPACE=${FEDORA_NAMESPACE}
+      - FEDORA_PASSWORD=${FEDORA_PASSWORD}
       - FEDORA_URL=${FEDORA_URL}
+      - FEDORA_USER=${FEDORA_USER}    
       - RAILS_ENV=production
       - RAILS_ADDITIONAL_HOSTS=${NGINX_CONTAINER_NAME}
       - RAILS_SERVE_STATIC_FILES=true       
@@ -124,8 +124,7 @@ services:
       - env_streaming_rtmp_base=rtmp://${KALTURA_HOSTNAME}:8880/avalon
       - env_streaming_content_path=/mnt/avalon/masterfiles  
       - env_initial_user=${INITIAL_USER}
-      - env_kaltura_hostname=${KALTURA_HOSTNAME}            
-      - env_ip_checker=${IP_CHECKER}       
+      - env_kaltura_hostname=${KALTURA_HOSTNAME}              
     volumes:
       - D:/Data/avalon_code:/home/app/avalon
       - ./data/masterfiles:/mnt/avalon/masterfiles

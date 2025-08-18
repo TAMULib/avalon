@@ -11,6 +11,6 @@ test:
 production:
   user: <%= ENV['FEDORA_USER'] %>
   password: <%= ENV['FEDORA_PASSWORD'] %>
-  url: http://<%= ENV['FEDORA_HOST'] %>:<%= ENV['FEDORA_PORT'] %>/fedora/rest
+  url: <%= ENV['FEDORA_URL'] %>
   base_path: /<%= ENV['FEDORA_BASE_PATH'] %>
   request: { timeout: 600, open_timeout: 60} # Increase if Fedora connection times out for large operations
