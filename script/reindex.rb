@@ -238,13 +238,13 @@ unless options[:skip_identification]
 	auth_header = "Basic " + Base64.strict_encode64("#{user}:#{pass}") if user && pass
 
 	headers = {
-	  "prefer" => "return=representation; include='http://www.w3.org/ns/ldp#PreferContainment'; omit='http://www.w3.org/ns/ldp#PreferMembership'",
+	  "Prefer" => 'return=representation; include="http://www.w3.org/ns/ldp#PreferContainment"; omit="http://www.w3.org/ns/ldp#PreferMembership"',
 	  "accept" => "application/n-triples, */*;q=0.5"
 	}
 	headers["authorization"] = auth_header if auth_header
 
 	http = HTTPX.plugin(:stream).with(headers: headers)
-	
+
     unless options[:skip_root_node]
       response = http.get(ActiveFedora.fedora.base_uri, stream: true)
       response.each_line do |line|
