@@ -6,7 +6,7 @@ class EnvironmentConfigurator < ActiveFedora::FileConfigurator
 def load_fedora_config
   return @fedora_config unless @fedora_config.is_a?(Hash) && @fedora_config.empty?
 
-  fedora_setting = Settings.fedora&.url || ENV['FEDORA_URL']
+  fedora_setting = Settings.fedora&.url || ENV['FEDORA_URL'] || "url: http://127.0.0.1:8983/fedora4/rest"
   fedora_timeout = Settings.fedora&.timeout || ENV['FEDORA_TIMEOUT']
 
   if fedora_setting.present?
