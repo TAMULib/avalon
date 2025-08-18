@@ -3,24 +3,42 @@ class EnvironmentConfigurator < ActiveFedora::FileConfigurator
     reset!
   end
 
-  def load_fedora_config
-    return @fedora_config unless @fedora_config.empty?
+def load_fedora_config
+  return @fedora_config unless @fedora_config.is_a?(Hash) && @fedora_config.empty?
 
-    fedora_setting = Settings.fedora&.url || ENV['FEDORA_URL']
-    fedora_timeout = Settings.fedora&.timeout || ENV['FEDORA_TIMEOUT']
-    if fedora_setting.present?
-      ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from FEDORA_URL") if ActiveFedora::Base.logger
-      fedora_url = URI.parse(fedora_setting)
-      @fedora_config = { user: fedora_url.user, password: fedora_url.password, base_path: ENV['FEDORA_BASE_PATH'] || "" }
-      fedora_url.userinfo = ''
-      @fedora_config[:url] = fedora_url.to_s
-      @fedora_config[:request] = { timeout: Float(fedora_timeout), open_timeout: Float(fedora_timeout) } unless fedora_timeout.blank?
-      ENV['FEDORA_URL'] ||= fedora_setting
-    else
-      super
+  fedora_setting = Settings.fedora&.url || ENV['FEDORA_URL']
+  fedora_timeout = Settings.fedora&.timeout || ENV['FEDORA_TIMEOUT']
+
+  if fedora_setting.present?
+    ActiveFedora::Base.logger&.info("ActiveFedora: loading fedora config from FEDORA_URL")
+
+    fedora_url = URI.parse(fedora_setting)
+    user = fedora_url.user
+    pass = fedora_url.password
+    fedora_url.userinfo = ''  # don’t store creds in the URL
+
+    base_path = ENV['FEDORA_BASE_PATH'].to_s
+    base_path = "/#{base_path}" unless base_path.empty? || base_path.start_with?('/')
+
+    @fedora_config = {
+      user: user || ENV['FEDORA_USER'],
+      password: pass || ENV['FEDORA_PASSWORD'],
+      base_path: base_path,
+      url: fedora_url.to_s
+    }
+
+    unless fedora_timeout.to_s.empty?
+      t = Float(fedora_timeout)
+      @fedora_config[:request] = { timeout: t, open_timeout: t }
     end
-    @fedora_config
+
+    ENV['FEDORA_URL'] ||= fedora_setting
+  else
+    super
   end
+
+  @fedora_config
+end
 
 
   def load_solr_config
