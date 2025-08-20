@@ -90,3 +90,4 @@ yarn-debug.log*
 .*.swo
 .*.swp
 
+/data

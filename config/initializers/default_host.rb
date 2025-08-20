@@ -1,12 +1,26 @@
 server_options = Settings.domain
+
 server_options = case server_options
 when String
   uri = URI.parse(server_options)
-  { host: uri.host, port: uri.port, protocol: uri.scheme }
+  {
+    host: uri.host || "localhost",
+    port: uri.port || 3000,
+    protocol: uri.scheme || "http"
+  }
 when Hash
-  server_options
+  {
+    host: server_options[:host].presence || "localhost",
+    port: server_options[:port].presence || 3000,
+    protocol: server_options[:protocol].presence || "http"
+  }
 else
-  server_options.to_hash
+  # Covers nil or anything unexpected
+  {
+    host: "localhost",
+    port: 3000,
+    protocol: "http"
+  }
 end
 
 if server_options
