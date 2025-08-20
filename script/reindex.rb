@@ -1,11 +1,11 @@
-# Copyright 2011-2024, The Trustees of Indiana University and Northwestern
+# Copyright 2011-2025, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -190,6 +190,10 @@ unless DB.tables.include? :reindexing_nodes
 end
 items = DB[:reindexing_nodes]
 
+puts "Verify the the settings" if options[:verbose]
+puts ActiveFedora.fedora_config.credentials.inspect if options[:verbose]
+puts "end of the settings" if options[:verbose]
+
 unless options[:skip_identification]
   if options[:read_solr_url]
     # Paginate this to avoid having one really large request?
@@ -225,9 +229,21 @@ unless options[:skip_identification]
       items.import([:uri, :state, :state_changed_at], uris_to_delete.product([["waiting deletion", DateTime.now]]).map(&:flatten), commit_every: 10_000)
     end
   else
-    require 'httpx'
-    http = HTTPX.plugin(:stream)
-    http = http.with(headers: {"prefer" => "return=representation; include=\"http://www.w3.org/ns/ldp#PreferContainment\"; omit=\"http://www.w3.org/ns/ldp#PreferMembership\"", "accept" => "application/n-triples, */*;q=0.5"})
+	require 'httpx'
+	require 'base64'
+
+	creds = ActiveFedora.fedora_config.credentials
+	user = creds[:user]
+	pass = creds[:password]
+	auth_header = "Basic " + Base64.strict_encode64("#{user}:#{pass}") if user && pass
+
+	headers = {
+	  "Prefer" => 'return=representation; include="http://www.w3.org/ns/ldp#PreferContainment"; omit="http://www.w3.org/ns/ldp#PreferMembership"',
+	  "accept" => "application/n-triples, */*;q=0.5"
+	}
+	headers["authorization"] = auth_header if auth_header
+
+	http = HTTPX.plugin(:stream).with(headers: headers)
 
     unless options[:skip_root_node]
       response = http.get(ActiveFedora.fedora.base_uri, stream: true)
