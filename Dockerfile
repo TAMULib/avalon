@@ -14,6 +14,7 @@ RUN        apt-get update && apt-get upgrade -y build-essential && apt-get autor
          && apt-get clean
 
 COPY        Gemfile ./Gemfile
+COPY        Gemfile.local ./Gemfile.local
 COPY        Gemfile.lock ./Gemfile.lock
 
 RUN         gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)" \
@@ -80,10 +81,15 @@ RUN         apt-get update && \
          && apt-get -y install mediainfo \
          && ln -s /usr/bin/lsof /usr/sbin/
 
-RUN         useradd -m -U app \
-         && su -s /bin/bash -c "mkdir -p /home/app/avalon" app
-WORKDIR     /home/app/avalon
+#user 1000:1000
+RUN groupadd -g 9999 app
+RUN useradd -u 9999 -g 9999 app
 
+RUN mkdir -p /home/app/avalon
+RUN chown app:app /home/app
+RUN chown app:app /home/app/avalon
+
+WORKDIR     /home/app/avalon
 
 # Build devevelopment image
 FROM        base as dev
@@ -135,7 +141,6 @@ ENV         RAILS_ENV=production
 
 RUN         SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') SHAKAPACKER_ASSET_HOST='' bundle exec rake assets:precompile
 RUN         cp config/controlled_vocabulary.yml.example config/controlled_vocabulary.yml
-
 
 # Build production image
 FROM        base as prod
