@@ -23,7 +23,6 @@ RUN         gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | ta
 ENV         RUBY_THREAD_MACHINE_STACK_SIZE 8388608
 ENV         RUBY_THREAD_VM_STACK_SIZE 8388608
 
-
 # Build development gems
 FROM        bundle as bundle-dev
 LABEL       stage=build
@@ -138,6 +137,14 @@ COPY        --from=node-modules --chown=app:app /node_modules ./node_modules
 
 USER        app
 ENV         RAILS_ENV=production
+ARG 	    env_avalon_hostname
+ARG         env_avalon_port
+ARG         env_avalon_protocol  
+ARG         FEDORA_BASE_PATH
+ARG         FEDORA_NAMESPACE 
+ARG         FEDORA_PASSWORD
+ARG         FEDORA_URL
+ARG         FEDORA_USER 
 
 RUN         SECRET_KEY_BASE=$(ruby -r 'securerandom' -e 'puts SecureRandom.hex(64)') SHAKAPACKER_ASSET_HOST='' bundle exec rake assets:precompile
 RUN         cp config/controlled_vocabulary.yml.example config/controlled_vocabulary.yml

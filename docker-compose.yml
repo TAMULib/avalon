@@ -74,6 +74,15 @@ services:
     image: ${VIC_SERVER}/avalon/${AVALON_CONTAINER_NAME}:${RANCHER_IMAGE_VERSION}
     build:
       context: .
+      args:
+       env_avalon_hostname: ${AVALON_HOSTNAME}
+       env_avalon_port: 3000
+       env_avalon_protocol: "http"   
+       FEDORA_BASE_PATH: ${FEDORA_BASE_PATH}
+       FEDORA_NAMESPACE: ${FEDORA_NAMESPACE} 
+       FEDORA_PASSWORD: ${FEDORA_PASSWORD}
+       FEDORA_URL: ${FEDORA_URL}
+       FEDORA_USER: ${FEDORA_USER}   
     command: bash -c "/home/app/avalon/docker_init.sh && bundle exec rails server -b 0.0.0.0"
     depends_on:
       - db

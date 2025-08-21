@@ -4,22 +4,22 @@ server_options = case server_options
 when String
   uri = URI.parse(server_options)
   {
-    host: uri.host || "localhost",
-    port: uri.port || 3000,
-    protocol: uri.scheme || "http"
+    host: uri.host,
+    port: uri.port,
+    protocol: uri.scheme
   }
 when Hash
   {
-    host: server_options[:host].presence || "localhost",
-    port: server_options[:port].presence || 3000,
-    protocol: server_options[:protocol].presence || "http"
+    host: server_options[:host].presence,
+    port: server_options[:port].presence,
+    protocol: server_options[:protocol].presence
   }
 else
   # Covers nil or anything unexpected
   {
-    host: "localhost",
-    port: 3000,
-    protocol: "http"
+    host: ENV['env_avalon_hostname'],
+    port: ENV['env_avalon_port'],
+    protocol: ENV['env_avalon_protocol']
   }
 end
 
